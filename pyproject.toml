@@ -1,0 +1,61 @@
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["log_analyzer*"]
+exclude = ["data*", "tests*"]
+
+[project]
+name = "log-analyzer-sattarab"
+version = "0.1.5"
+description = "Command-line tool to analyze log files and summarize counts by level."
+readme = "README.md"
+requires-python = ">=3.10"
+
+license = { text = "MIT" }
+
+authors = [
+    { name = "Abdul Sattar" }
+]
+
+keywords = ["logs", "cli", "analysis"]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/your-username/log-analyzer"
+Issues = "https:// github.com/your-username/log-analyzer/issues"
+
+[project.scripts]
+log-analyzer = "log_analyzer.cli:main"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

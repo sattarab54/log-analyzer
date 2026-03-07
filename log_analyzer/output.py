@@ -1,0 +1,59 @@
+
+
+# log_analyzer/output.py
+
+from __future__ import annotations
+
+import json
+from typing import Iterable, TextIO
+
+DEFAULT_LEVELS = ["ERROR", "WARNING", "INFO", "DEBUG"]
+
+
+def iter_rows(
+    counts: dict[str, int],
+    sort: str = "level",
+    reverse: bool = False,
+    levels: list[str] | None = None,
+) -> list[tuple[str, int]]:
+    lvls = levels if levels is not None else DEFAULT_LEVELS
+    rows = [(lvl, int(counts.get(lvl, 0))) for lvl in lvls]
+
+    if sort == "count":
+        # default: largest count first
+        rows.sort(key=lambda t: (-t[1], t[0]))
+        if reverse:
+            rows.reverse()
+    else:
+        # keep given level order; reverse just flips that order
+        if reverse:
+            rows.reverse()
+
+    return rows
+
+def print_table(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
+    print("level  count", file=file)
+    for level, count in rows:
+        print(f"{level}: {count}", file=file)
+
+
+def print_csv(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
+    print("level,count", file=file)
+    for level, count in rows:
+        print(f"{level},{count}", file=file)
+
+
+def print_json(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
+    data = {level: count for level, count in rows}
+    json.dump(data, file, indent=2, sort_keys=True)
+    print(file=file)  # newline
+
+
+
+
+
+
+
+
+
+

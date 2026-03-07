@@ -1,0 +1,52 @@
+
+
+
+import argparse
+from .analyzer import LEVEL_ORDER
+
+LEVEL_CHOICES = LEVEL_ORDER
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Log Analyzer CLI")
+
+    parser.add_argument("-f", "--file", required=True, help="Log file path")
+
+    parser.add_argument(
+        "--format",
+        choices=["table", "csv", "json"],
+        default="table",
+        help="Output format",
+    )
+
+    parser.add_argument(
+        "--level",
+        action="append",
+        choices=LEVEL_CHOICES,
+        help="Filter to one level (repeatable). Example: --level ERROR --level INFO",
+    )
+
+    parser.add_argument(
+        "--sort",
+        choices=["level", "count"],
+        default="level",
+        help="Sort output by level order or by count",
+    )
+
+    parser.add_argument(
+        "--reverse",
+        action="store_true",
+        help="Reverse the final output order",
+    )
+
+    parser.add_argument(
+        "--output",
+        help="Write output to a file instead of stdout",
+    )
+
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite output file if it already exists",
+    )
+
+    return parser
