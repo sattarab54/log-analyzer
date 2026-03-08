@@ -143,3 +143,5 @@ python -m pytest
 - CLI runs correctly  
 - All tests pass  
 - Editable install works (`pip install -e .`)
+
+Testing GitHub Actions workflow
