@@ -9,7 +9,7 @@ exclude = ["data*", "tests*"]
 
 [project]
 name = "log-analyzer-sattarab"
-version = "0.1.6"
+version = "0.1.7"
 description = "Command-line tool to analyze log files and summarize counts by level."
 readme = "README.md"
 requires-python = ">=3.10"
