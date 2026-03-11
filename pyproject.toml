@@ -9,7 +9,7 @@ exclude = ["data*", "tests*"]
 
 [project]
 name = "log-analyzer-sattarab"
-version = "0.1.7"
+version = "0.1.8"
 description = "Command-line tool to analyze log files and summarize counts by level."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -31,8 +31,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/your-username/log-analyzer"
-Issues = "https:// github.com/your-username/log-analyzer/issues"
+Homepage = "https://github.com/sattarab54/log-analyzer"
+Issues = "https:// github.com/your-sattarab54/log-analyzer/issues"
 
 [project.scripts]
 log-analyzer = "log_analyzer.cli:main"
