@@ -57,8 +57,14 @@ def main(argv=None) -> int:
             print_csv(rows, file=target)
         elif args.format == "json":
             print_json(rows, file=target)
-        else:
-            print_table(rows, file=target)
+        else:            
+            total = sum(count for _, count in rows)
+            print("level count percent", file=target)
+            for level, count in rows:
+                percent = (count / total) * 100
+                print(f"{level}: {count} ({percent: .1f}%)", file=target)
+            print("_" * 16, file=target)
+            print(f"TOTAL: {total}", file=target)
 
         return 0
 
