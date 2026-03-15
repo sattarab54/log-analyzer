@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: log-analyzer-sattarab
-Version: 0.1.9
+Version: 0.2.1
 Summary: Command-line tool to analyze log files and summarize counts by level.
 Author: Abdul Sattar
 License: MIT
@@ -12,6 +12,8 @@ Classifier: License :: OSI Approved :: MIT License
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.10
 Description-Content-Type: text/markdown
+License-File: LICENSE
+Dynamic: license-file
 
 
 # log-analyzer
@@ -158,3 +160,5 @@ python -m pytest
 - CLI runs correctly  
 - All tests pass  
 - Editable install works (`pip install -e .`)
+
+Testing GitHub Actions workflow

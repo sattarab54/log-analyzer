@@ -42,11 +42,25 @@ def print_csv(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
     for level, count in rows:
         print(f"{level},{count}", file=file)
 
-
 def print_json(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
-    data = {level: count for level, count in rows}
-    json.dump(data, file, indent=2, sort_keys=True)
+    rows = list(rows)
+    total = sum(count for _, count in rows)
+
+    data = {
+        "rows": [
+            {
+                "level": level,
+                "count": count,
+                "percent": round((count / total) * 100, 1) if total else 0.0,
+            }
+            for level, count in rows
+        ],
+        "total": total,
+    }
+
+    json.dump(data, file, indent=2, sort_keys=False)
     print(file=file)  # newline
+
 
 
 
