@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: log-analyzer-sattarab
-Version: 0.2.1
+Version: 0.2.4
 Summary: Command-line tool to analyze log files and summarize counts by level.
 Author: Abdul Sattar
 License: MIT
