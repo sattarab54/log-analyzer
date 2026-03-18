@@ -33,6 +33,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--top",
+        type=int,
+        help="Show top N results after sorting"
+    )
+
+    parser.add_argument(
         "--reverse",
         action="store_true",
         help="Reverse the final output order",

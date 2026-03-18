@@ -24,12 +24,18 @@ def main(argv=None) -> int:
         return 2
 
     counts = analyze_logs(lines)
+    full_total = sum(counts.values())
 
     # Optional level filter
     levels = args.level if args.level else None
 
     # Build rows
     rows = iter_rows(counts, args.sort, args.reverse, levels=levels)
+    if args.top is not None:
+        if args.top <= 0:
+            print("Error: --top must be greater than 0", file=sys.stderr)
+            return 2
+        rows = rows[:args.top]
 
     out_fh = None
     try:
@@ -54,18 +60,12 @@ def main(argv=None) -> int:
 
         # --- Output format ---
         if args.format == "csv":
-            print_csv(rows, file=target)
+            print_csv(rows, file=target, total=full_total)
         elif args.format == "json":
-            print_json(rows, file=target)
+            print_json(rows, file=target, total=full_total)
         else:            
-            total = sum(count for _, count in rows)
-            print("level count percent", file=target)
-            for level, count in rows:
-                percent = (count / total) * 100
-                print(f"{level}: {count} ({percent: .1f}%)", file=target)
-            print("_" * 16, file=target)
-            print(f"TOTAL: {total}", file=target)
-
+            print_table(rows, file=target, total=full_total)
+            
         return 0
 
     finally:

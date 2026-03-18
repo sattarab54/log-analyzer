@@ -31,16 +31,18 @@ def iter_rows(
 
     return rows
 
-def print_table(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
-    print("level  count", file=file)
+def print_table(rows: Iterable[tuple[str, int]], file: TextIO, total: int) -> None:
+    print("level  count percent", file=file)
     for level, count in rows:
-        print(f"{level}: {count}", file=file)
+        percent = round((count / total) * 100, 1) if total else 0.0
+        print(f"{level}: {count} ({percent:.1f}%)", file=file)
+    print("_" * 20, file=file)
+    print(f"TOTAL: {total}", file=file)
 
 
-def print_csv(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
+def print_csv(rows: Iterable[tuple[str, int]], file: TextIO, total: int) -> None:
     rows = list(rows)
-    total = sum(count for _, count in rows)
-
+    
     print("level,count,percent", file=file)
 
     for level, count in rows:
@@ -48,10 +50,9 @@ def print_csv(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
         print(f"{level},{count},{percent}", file=file)
     print(f"TOTAL,{total},100.0" if total else "TOTAL,0,0.0", file=file)
 
-def print_json(rows: Iterable[tuple[str, int]], file: TextIO) -> None:
+def print_json(rows: Iterable[tuple[str, int]], file: TextIO, total: int) -> None:
     rows = list(rows)
-    total = sum(count for _, count in rows)
-
+    
     data = {
         "rows": [
             {
