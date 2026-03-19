@@ -37,6 +37,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Show top N results after sorting"
     )
+    parser.add_argument(
+        "--min-count",
+        type=int,
+        help="Show only levels with count >= N"
+    )
 
     parser.add_argument(
         "--reverse",
