@@ -31,10 +31,11 @@ def main(argv=None) -> int:
 
     # Build rows
     rows = iter_rows(counts, args.sort, args.reverse, levels=levels)
-    if args.min_count < 0:
-        print("Error: --mini-count must be >= 0", file=sys.stderr)
-        return 2
-    rows = [(lvl, cnt) for lvl, cnt in rows if cnt >= args.min_count]
+    if args.min_count is not None:
+        if args.min_count < 0:
+            print("Error: --mini-count must be >= 0", file=sys.stderr)
+            return 2
+        rows = [(lvl, cnt) for lvl, cnt in rows if cnt >= args.min_count]
     
     if args.top is not None:
         if args.top <= 0:

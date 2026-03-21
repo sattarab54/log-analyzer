@@ -20,9 +20,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--level",
-        action="append",
-        choices=LEVEL_CHOICES,
-        help="Filter to one level (repeatable). Example: --level ERROR --level INFO",
+        nargs="+",
+        type=str.upper,
+        choices=["ERROR", "WARNING", "INFO", "DEBUG"],
+        help="Filter by log level(s)"
     )
 
     parser.add_argument(
