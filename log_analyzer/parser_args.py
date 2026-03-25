@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--level",
-        nargs="+",
+        action="append",
         type=str.upper,
         choices=["ERROR", "WARNING", "INFO", "DEBUG"],
         help="Filter by log level(s)"

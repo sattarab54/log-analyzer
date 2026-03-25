@@ -3,6 +3,7 @@
 from pathlib import Path
 import pytest
 from log_analyzer.cli import main
+from log_analyzer.analyzer import analyze_logs
 import json
 
 def write_sample(tmp_path: Path) -> Path:
@@ -29,11 +30,13 @@ def test_cli_csv_writes_to_output_file(tmp_path, capsys):
 
     # file written
     text = out_file.read_text(encoding="utf-8").splitlines()
-    assert text[0].strip() == "level,count"
-    assert "INFO,3" in text
-    assert "ERROR,2" in text
-    assert "WARNING,1" in text
-    assert "DEBUG,0" in text
+    assert text[0].strip() == "level,count,percent"
+    assert "INFO,3,50.0" in text
+    assert "ERROR,2,33.3" in text
+    assert "WARNING,1,16.7" in text
+    assert "DEBUG,0,0.0" in text
+    assert "TOTAL,6,100.0" in text
+    
 
 def test_cli_table_writes_to_output_file(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -44,10 +47,10 @@ def test_cli_table_writes_to_output_file(tmp_path, capsys):
     assert capsys.readouterr().out.strip() == ""
 
     text = out_file.read_text(encoding="utf-8").splitlines()
-    assert "INFO: 3" in text
-    assert "ERROR: 2" in text
-    assert "WARNING: 1" in text
-    assert "DEBUG: 0" in text
+    assert "INFO: 3 (50.0%)" in text
+    assert "ERROR: 2 (33.3%)" in text
+    assert "WARNING: 1 (16.7%)" in text
+    assert "DEBUG: 0 (0.0%)" in text
 
 def write_sample(tmp_path):
     p = tmp_path / "sample.log"
@@ -71,14 +74,14 @@ def test_cli_sort_by_count(tmp_path, capsys):
     main(["-f", str(log_file), "--sort", "count"])
     out = capsys.readouterr().out.strip().splitlines()
     # INFO is 3 (largest), should appear before ERROR (2), WARNING (1), DEBUG (0)
-    assert out.index("INFO: 3") < out.index("ERROR: 2")
-    assert out.index("ERROR: 2") < out.index("WARNING: 1")
+    assert out.index("INFO: 3 (50.0%)") < out.index("ERROR: 2 (33.3%)")
+    assert out.index("ERROR: 2 (33.3%)") < out.index("WARNING: 1 (16.7%)")
 
 def test_cli_sort_by_count_reverse(tmp_path, capsys):
     log_file = write_sample(tmp_path)
     main(["-f", str(log_file), "--sort", "count", "--reverse"])
     out = capsys.readouterr().out.strip().splitlines()
-    assert out.index("DEBUG: 0") < out.index("WARNING: 1")
+    assert out.index("DEBUG: 0 (0.0%)") < out.index("WARNING: 1 (16.7%)")
 
 def test_cli_default_table_output(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -91,10 +94,10 @@ def test_cli_default_table_output(tmp_path, capsys):
     # INFO: 3
     # ERROR: 2
     # WARNING: 1
-    assert "INFO: 3" in out
-    assert "ERROR: 2" in out
-    assert "WARNING: 1" in out
-
+    assert "INFO: 3 (50.0%)" in out
+    assert "ERROR: 2 (33.3%)" in out
+    assert "WARNING: 1 (16.7%)" in out
+    assert "DEBUG: 0 (0.0%)" in out
 
 def test_cli_csv_output(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -102,16 +105,13 @@ def test_cli_csv_output(tmp_path, capsys):
     main(["-f", str(log_file), "--format", "csv"])
 
     out = capsys.readouterr().out.strip().splitlines()
-    # Example expected:
-    # level,count
-    # INFO,3
-    # ERROR,2
-    # WARNING,1
-    assert out[0].strip() == "level,count"
-    assert "INFO,3" in out
-    assert "ERROR,2" in out
-    assert "WARNING,1" in out
-    assert "DEBUG,0" in out
+
+    assert out[0].strip() == "level,count,percent"
+    assert "INFO,3,50.0" in out
+    assert "ERROR,2,33.3" in out
+    assert "WARNING,1,16.7" in out
+    assert "DEBUG,0,0.0" in out
+    assert "TOTAL,6,100.0" in out
 
 def test_cli_requires_file_argument():
     with pytest.raises(SystemExit):
@@ -128,25 +128,27 @@ def test_cli_writes_output_file(tmp_path, capsys):
     assert captured.out.strip() == ""
 
     text = out_file.read_text(encoding="utf-8").splitlines()
-    assert text[0] == "level,count"
-    assert "INFO,3" in text
-    assert "ERROR,2" in text
-    assert "WARNING,1" in text
+    assert text[0] == "level,count,percent"
+    assert "INFO,3,50.0" in text
+    assert "ERROR,2,33.3" in text
+    assert "WARNING,1,16.7" in text
 
 def test_cli_level_filter_single(tmp_path, capsys):
     log_file = write_sample(tmp_path)
     main(["-f", str(log_file), "--level", "ERROR"])
     out = capsys.readouterr().out.strip().splitlines()
-    assert "ERROR: 2" in out
+    assert any(line.startswith("ERROR: 2 (100.0%)") for line in out)
     assert not any(line.startswith("INFO:") for line in out)
     assert not any(line.startswith("WARNING:") for line in out)
+    assert not any(line.startswith("DEBUG:") for line in out)
 
 def test_cli_level_filter_multiple(tmp_path, capsys):
     log_file = write_sample(tmp_path)
     main(["-f", str(log_file), "--level", "ERROR", "--level", "INFO"])
     out = capsys.readouterr().out.strip().splitlines()
-    assert "ERROR: 2" in out
-    assert "INFO: 3" in out
+
+    assert any(line.startswith("ERROR: 2") for line in out)
+    assert any(line.startswith("INFO: 3") for line in out)
     assert not any(line.startswith("WARNING:") for line in out)
 
 def test_cli_json_output(tmp_path, capsys):
@@ -156,11 +158,27 @@ def test_cli_json_output(tmp_path, capsys):
     out = capsys.readouterr().out.strip()
 
     data = json.loads(out)
-    assert data["INFO"] == 3
-    assert data["ERROR"] == 2
-    assert data["WARNING"] == 1
-    assert data.get("DEBUG", 0) == 0
+    rows = data["rows"]
 
+    info_row = next(row for row in rows if row["level"] == "INFO")
+    error_row = next(row for row in rows if row["level"] == "ERROR")
+    warning_row = next(row for row in rows if row["level"] == "WARNING")
+    debug_row = next(row for row in rows if row["level"] == "DEBUG")
+
+    assert info_row["count"] == 3
+    assert info_row["percent"] == 50.0
+
+    assert error_row["count"] == 2
+    assert error_row["percent"] == 33.3
+
+    assert warning_row["count"] == 1
+    assert warning_row["percent"] == 16.7
+
+    assert debug_row["count"] == 0
+    assert debug_row["percent"] == 0.0
+
+    assert data["total"] == 6
+        
 def test_cli_reads_from_stdin_when_file_is_dash(tmp_path, capsys, monkeypatch):
     # Feed stdin with sample log content
     sample = (
@@ -178,9 +196,24 @@ def test_cli_reads_from_stdin_when_file_is_dash(tmp_path, capsys, monkeypatch):
 
     out = capsys.readouterr().out.strip().splitlines()
     # Default table output includes counts for known levels
-    assert "INFO: 3" in out
-    assert "ERROR: 2" in out
-    assert "WARNING: 1" in out
+    assert "INFO: 3 (50.0%)" in out
+    assert "ERROR: 2 (33.3%)" in out
+    assert "WARNING: 1 (16.7%)" in out
+    assert "DEBUG: 0 (0.0%)" in out
+
+def test_cli_csv_output(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    main(["-f", str(log_file), "--format", "csv"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert out[0].strip() == "level,count,percent"
+    assert "INFO,3,50.0" in out
+    assert "ERROR,2,33.3" in out
+    assert "WARNING,1,16.7" in out
+    assert "DEBUG,0,0.0" in out
+    assert "TOTAL,6,100.0" in out
 
 def test_cli_stdin_csv_format(tmp_path, capsys, monkeypatch):
     sample = (
@@ -194,11 +227,12 @@ def test_cli_stdin_csv_format(tmp_path, capsys, monkeypatch):
     main(["-f", "-", "--format", "csv"])
 
     out = capsys.readouterr().out.strip().splitlines()
-    assert out[0].strip() == "level,count"
-    # order depends on your LEVEL_ORDER; just check the rows exist
-    assert "INFO,2" in out
-    assert "ERROR,1" in out
-    assert "WARNING,1" in out
+    assert out[0].strip() == "level,count,percent"
+    assert "INFO,2,50.0" in out
+    assert "ERROR,1,25.0" in out
+    assert "WARNING,1,25.0" in out
+    assert "DEBUG,0,0.0" in out
+    assert "TOTAL,4,100.0" in out
 
 def test_cli_missing_input_file_returns_2(capsys):
     rc = main(["-f", "does_not_exist.log"])
@@ -212,7 +246,24 @@ def test_cli_output_exists_returns_2(tmp_path):
     rc = main(["-f", "data/sample.log", "--output", str(out_file)])
     assert rc == 2
 
+def test_analyze_logs_counts_levels() -> None:
+    from log_analyzer.analyzer import analyze_logs
 
+    lines = [
+        "INFO Start application\n",
+        "WARNING Disk almost full\n",
+        "ERROR Cannot connect\n",
+        "INFO User login\n",
+        "DEBUG Cache refreshed\n",
+        "ERROR Timeout\n",
+    ]
+
+    counts = analyze_logs(lines)
+
+    assert counts["ERROR"] == 2
+    assert counts["WARNING"] == 1
+    assert counts["INFO"] == 2
+    assert counts["DEBUG"] == 1
 
 
     

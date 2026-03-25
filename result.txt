@@ -1,5 +1,7 @@
-level  count
-ERROR: 1
-WARNING: 1
-INFO: 1
-DEBUG: 0
+level  count percent
+ERROR: 2 (33.3%)
+WARNING: 1 (16.7%)
+INFO: 3 (50.0%)
+DEBUG: 0 (0.0%)
+____________________
+TOTAL: 6

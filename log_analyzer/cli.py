@@ -43,6 +43,8 @@ def main(argv=None) -> int:
             return 2
         rows = rows[:args.top]
 
+    full_total = sum(cnt for _, cnt in rows)
+
     out_fh = None
     try:
         # --- Output destination ---
