@@ -265,9 +265,26 @@ def test_analyze_logs_counts_levels() -> None:
     assert counts["INFO"] == 2
     assert counts["DEBUG"] == 1
 
+def test_cli_no_total_table(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--no-total"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert any(line.startswith("INFO: 3") for line in out)
+    assert not any(line.startswith("TOTAL:") for line in out)
     
+def test_cli_no_total_csv(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--format", "csv", "--no-total"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert out[0].strip() == "level,count,percent"
+    assert "INFO,3,50.0" in out
+    assert not any(line.startswith("TOTAL,") for line in out)
 
 
 

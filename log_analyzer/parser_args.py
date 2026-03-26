@@ -23,6 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
         action="append",
         type=str.upper,
         choices=["ERROR", "WARNING", "INFO", "DEBUG"],
+        
         help="Filter by log level(s)"
     )
 
@@ -61,4 +62,26 @@ def build_parser() -> argparse.ArgumentParser:
         help="Overwrite output file if it already exists",
     )
 
+    parser.add_argument(
+        "--no-total",
+        action="store_true",
+        help="Do not show total row in output",
+    )   
+
     return parser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

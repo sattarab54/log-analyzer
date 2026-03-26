@@ -44,6 +44,7 @@ def main(argv=None) -> int:
         rows = rows[:args.top]
 
     full_total = sum(cnt for _, cnt in rows)
+    show_total = not args.no_total
 
     out_fh = None
     try:
@@ -68,11 +69,11 @@ def main(argv=None) -> int:
 
         # --- Output format ---
         if args.format == "csv":
-            print_csv(rows, file=target, total=full_total)
+            print_csv(rows, file=target, total=full_total, show_total=show_total)
         elif args.format == "json":
-            print_json(rows, file=target, total=full_total)
+            print_json(rows, file=target, total=full_total, show_total=show_total)
         else:            
-            print_table(rows, file=target, total=full_total)
+            print_table(rows, file=target, total=full_total, show_total=show_total)
             
         return 0
 
