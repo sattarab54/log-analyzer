@@ -27,8 +27,24 @@ def main(argv=None) -> int:
     full_total = sum(counts.values())
 
     # Optional level filter
-    levels = args.level if args.level else None
+    levels = []
 
+    if args.level:
+        levels.extend(args.level)
+
+    if args.levels:
+        extra_levels = [item.strip().upper() for item in args.levels.split(",") if item.strip()]
+        valid_levels = {"ERROR", "WARNING", "INFO", "DEBUG"}
+
+        for level in extra_levels:
+            if level not in valid_levels:
+                print(f"Error: invalid level in --levels: {level}", file=sys.stderr)
+                return 2
+
+        levels.extend(extra_levels)
+
+    levels = levels if levels else None
+        
     # Build rows
     rows = iter_rows(counts, args.sort, args.reverse, levels=levels)
     if args.min_count is not None:

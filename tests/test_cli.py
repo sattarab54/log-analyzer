@@ -286,11 +286,37 @@ def test_cli_no_total_csv(tmp_path, capsys):
     assert "INFO,3,50.0" in out
     assert not any(line.startswith("TOTAL,") for line in out)
 
+def test_cli_levels_comma_separated(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--levels", "ERROR,INFO"])
 
+    out = capsys.readouterr().out.strip().splitlines()
 
+    assert any(line.startswith("ERROR: 2") for line in out)
+    assert any(line.startswith("INFO: 3") for line in out)
+    assert not any(line.startswith("WARNING:") for line in out)
+    assert not any(line.startswith("DEBUG:") for line in out)
 
+def test_cli_levels_comma_separated_lowercase(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--levels", "error,info"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert any(line.startswith("ERROR: 2") for line in out)
+    assert any(line.startswith("INFO: 3") for line in out)
+    assert not any(line.startswith("WARNING:") for line in out)
+
+def test_cli_levels_invalid_value_returns_2(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    rc = main(["-f", str(log_file), "--levels", "ERROR,BOGUS"])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert "invalid level in --levels: BOGUS" in captured.err
 
 
 

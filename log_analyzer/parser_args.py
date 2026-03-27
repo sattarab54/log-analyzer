@@ -28,6 +28,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--levels",
+        help="Comma-separated log levels, for example ERROR,INFO",
+    )
+
+    parser.add_argument(
         "--sort",
         choices=["level", "count"],
         default="level",
