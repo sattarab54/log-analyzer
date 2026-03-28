@@ -31,23 +31,40 @@ def iter_rows(
 
     return rows
 
-def print_table(rows: Iterable[tuple[str, int]], file: TextIO, total: int, show_total: bool = True ) -> None:
-    print("level  count percent", file=file)
+def print_table(
+    rows: Iterable[tuple[str, int]],
+    file: TextIO,
+    total: int,
+    show_total: bool = True,
+    show_header: bool = True,
+) -> None:
+    if show_header:
+        print("level  count  percent", file=file)
+
     for level, count in rows:
         percent = round((count / total) * 100, 1) if total else 0.0
         print(f"{level}: {count} ({percent:.1f}%)", file=file)
+
     if show_total:
-        print("_" * 20, file=file)
+        print("-" * 20, file=file)
         print(f"TOTAL: {total}", file=file)
 
-def print_csv(rows: Iterable[tuple[str, int]], file: TextIO, total: int, show_total: bool = True) -> None:
+def print_csv(
+    rows: Iterable[tuple[str, int]],
+    file: TextIO,
+    total: int,
+    show_total: bool = True,
+    show_header: bool = True,
+) -> None:
     rows = list(rows)
-    
-    print("level,count,percent", file=file)
+
+    if show_header:
+        print("level,count,percent", file=file)
 
     for level, count in rows:
-        percent = round((count / total) *100, 1)if total else 0.0
+        percent = round((count / total) * 100, 1) if total else 0.0
         print(f"{level},{count},{percent}", file=file)
+
     if show_total:
         print(f"TOTAL,{total},100.0" if total else "TOTAL,0,0.0", file=file)
     

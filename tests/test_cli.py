@@ -113,9 +113,12 @@ def test_cli_csv_output(tmp_path, capsys):
     assert "DEBUG,0,0.0" in out
     assert "TOTAL,6,100.0" in out
 
-def test_cli_requires_file_argument():
-    with pytest.raises(SystemExit):
-        main([])  # argparse should exit because -f/--file is required
+def test_cli_requires_file_argument(capsys):
+    rc = main([])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert "Error: -f/--file is required" in captured.err
 
 def test_cli_writes_output_file(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -195,12 +198,19 @@ def test_cli_reads_from_stdin_when_file_is_dash(tmp_path, capsys, monkeypatch):
     main(["-f", "-"])
 
     out = capsys.readouterr().out.strip().splitlines()
+
     # Default table output includes counts for known levels
     assert "INFO: 3 (50.0%)" in out
     assert "ERROR: 2 (33.3%)" in out
     assert "WARNING: 1 (16.7%)" in out
     assert "DEBUG: 0 (0.0%)" in out
 
+def test_cli_version(capsys):
+    from log_analyzer.cli import main
+    main(["--version"])
+    out = capsys.readouterr().out.strip()
+    assert out == "0.6.0"    
+   
 def test_cli_csv_output(tmp_path, capsys):
     log_file = write_sample(tmp_path)
 

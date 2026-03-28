@@ -1,5 +1,5 @@
 
-
+from . import __version__
 import os
 import sys
 
@@ -13,6 +13,14 @@ def main(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    if args.version:
+        print(__version__)
+        return 0
+
+    if not args.version and not args.file:
+        print("Error: -f/--file is required", file=sys.stderr)
+        return 2
+        
     # --- Read input ---
     try:
         if args.file == "-":
@@ -84,12 +92,15 @@ def main(argv=None) -> int:
             target = sys.stdout
 
         # --- Output format ---
+        
+        show_header = not args.no_header
+
         if args.format == "csv":
-            print_csv(rows, file=target, total=full_total, show_total=show_total)
+            print_csv(rows, file=target, total=full_total, show_total=show_total, show_header=show_header)
         elif args.format == "json":
-            print_json(rows, file=target, total=full_total, show_total=show_total)
-        else:            
-            print_table(rows, file=target, total=full_total, show_total=show_total)
+            print_json(rows, file=target, total=full_total)
+        else:
+            print_table(rows, file=target, total=full_total, show_total=show_total, show_header=show_header)
             
         return 0
 

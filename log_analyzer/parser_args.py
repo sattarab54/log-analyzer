@@ -9,7 +9,7 @@ LEVEL_CHOICES = LEVEL_ORDER
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Log Analyzer CLI")
 
-    parser.add_argument("-f", "--file", required=True, help="Log file path")
+    parser.add_argument("-f", "--file", required=False, help="Log file path")
 
     parser.add_argument(
         "--format",
@@ -71,7 +71,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--no-total",
         action="store_true",
         help="Do not show total row in output",
-    )   
+    )
+    parser.add_argument(
+        "--no-header",
+        action="store_true",
+        help="Do not show header row in table or CSV output",
+    )
+    parser.add_argument(
+        "--version",
+        action="store_true",
+        help="Show version and exit",
+    )
 
     return parser
 
