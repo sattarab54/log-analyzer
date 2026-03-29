@@ -328,7 +328,59 @@ def test_cli_levels_invalid_value_returns_2(tmp_path, capsys):
     assert rc == 2
     assert "invalid level in --levels: BOGUS" in captured.err
 
+def test_cli_percent_decimals_table(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--percent-decimals", "2"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert "ERROR: 2 (33.33%)" in out
+    assert "WARNING: 1 (16.67%)" in out
+    assert "INFO: 3 (50.00%)" in out
+    assert "DEBUG: 0 (0.00%)" in out
+
+def test_cli_percent_decimals_csv_zero(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    main(["-f", str(log_file), "--format", "csv", "--percent-decimals", "0"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert out[0].strip() == "level,count,percent"
+    assert "ERROR,2,33" in out
+    assert "WARNING,1,17" in out
+    assert "INFO,3,50" in out
+    assert "DEBUG,0,0" in out
+    assert "TOTAL,6,100" in out
+
+def test_cli_percent_decimals_json(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    main(["-f", str(log_file), "--format", "json", "--percent-decimals", "2"])
+    out = capsys.readouterr().out.strip()
+
+    data = json.loads(out)
+    rows = data["rows"]
+
+    info_row = next(row for row in rows if row["level"] == "INFO")
+    error_row = next(row for row in rows if row["level"] == "ERROR")
+    warning_row = next(row for row in rows if row["level"] == "WARNING")
+    debug_row = next(row for row in rows if row["level"] == "DEBUG")
+
+    assert info_row["percent"] == 50.0
+    assert error_row["percent"] == 33.33
+    assert warning_row["percent"] == 16.67
+    assert debug_row["percent"] == 0.0
+
+def test_cli_percent_decimals_negative_returns_2(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    rc = main(["-f", str(log_file), "--percent-decimals", "-1"])
+
+    captured = capsys.readouterr()
+    assert rc == 2
+    assert "percent_decimals must be >= 0" in captured.err
 
 
 

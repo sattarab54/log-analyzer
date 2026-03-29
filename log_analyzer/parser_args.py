@@ -78,6 +78,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Do not show header row in table or CSV output",
     )
     parser.add_argument(
+        "--percent-decimals",
+        type=int,
+        default=1,
+        help="Number of decimal places for percent output",
+    )
+    parser.add_argument(
         "--version",
         action="store_true",
         help="Show version and exit",

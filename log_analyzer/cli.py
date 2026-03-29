@@ -17,6 +17,10 @@ def main(argv=None) -> int:
         print(__version__)
         return 0
 
+    if args.percent_decimals < 0:
+            print("Error: --percent_decimals must be >= 0", file=sys.stderr)
+            return 2
+
     if not args.version and not args.file:
         print("Error: -f/--file is required", file=sys.stderr)
         return 2
@@ -95,12 +99,33 @@ def main(argv=None) -> int:
         
         show_header = not args.no_header
 
+        decimals = args.percent_decimals
+
         if args.format == "csv":
-            print_csv(rows, file=target, total=full_total, show_total=show_total, show_header=show_header)
+            print_csv(
+                rows,
+                file=target,
+                total=full_total,
+                show_total=show_total,
+                show_header=show_header,
+                percent_decimals=decimals,
+            )
         elif args.format == "json":
-            print_json(rows, file=target, total=full_total)
+            print_json(
+                rows,
+                file=target,
+                total=full_total,                
+                percent_decimals=decimals,
+            )
         else:
-            print_table(rows, file=target, total=full_total, show_total=show_total, show_header=show_header)
+            print_table(
+                rows,
+                file=target,
+                total=full_total,
+                show_total=show_total,
+                show_header=show_header,
+                percent_decimals=decimals,
+            )
             
         return 0
 
