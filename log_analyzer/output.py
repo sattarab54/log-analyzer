@@ -37,14 +37,22 @@ def print_table(
     total: int,
     show_total: bool = True,
     show_header: bool = True,
+    show_percent: bool = True,
     percent_decimals: int = 1,
 ) -> None:
     if show_header:
-        print("level  count  percent", file=file)
+        if show_percent:
+            print("level  count  percent", file=file)
+        else:
+            print("level  count", file=file)
 
     for level, count in rows:
         percent = round((count / total) * 100, percent_decimals) if total else 0.0
-        print(f"{level}: {count} ({percent:.{percent_decimals}f}%)", file=file)
+
+        if show_percent:
+            print(f"{level}: {count} ({percent:.{percent_decimals}f}%)", file=file)
+        else:
+            print(f"{level}: {count}", file=file)
 
     if show_total:
         print("-" * 20, file=file)
@@ -56,47 +64,60 @@ def print_csv(
     total: int,
     show_total: bool = True,
     show_header: bool = True,
+    show_percent: bool = True,
     percent_decimals: int = 1,
 ) -> None:
     rows = list(rows)
-
+    
     if show_header:
-        print("level,count,percent", file=file)
+        if show_percent:
+            print("level,count,percent", file=file)
+        else:
+            print("level,count", file=file)
 
     for level, count in rows:
         percent = round((count / total) * 100, percent_decimals) if total else 0.0
-        print(f"{level},{count},{percent:.{percent_decimals}f}", file=file)
+
+        if show_percent:
+            print(f"{level},{count},{percent:.{percent_decimals}f}", file=file)
+        else:
+            print(f"{level},{count}", file=file)
+
     if show_total:
-        total_percent = f"{100:.{percent_decimals}f}" if total else f"{0:.{percent_decimals}f}"
-        print(f"TOTAL,{total},{total_percent}" if total else f"TOTAL,0,{total_percent}", file=file)
+        if show_percent:
+            total_percent = f"{100:.{percent_decimals}f}" if total else f"{0:.{percent_decimals}f}"
+            print(f"TOTAL,{total},{total_percent}", file=file)
+        else:
+            print(f"TOTAL,{total}", file=file)
         
 def print_json(
     rows: Iterable[tuple[str, int]],
     file: TextIO,
     total: int,
+    show_percent: bool = True,
     percent_decimals: int = 1,
 ) -> None:
     rows = list(rows)
-    
+
     data = {
-        "rows": [
-            {
-                "level": level,
-                "count": count,
-                "percent": round((count / total) * 100, percent_decimals) if total else 0.0,
-            }
-            for level, count in rows
-        ],
+        "rows": [],
         "total": total,
     }
 
+    for level, count in rows:
+        row = {
+            "level": level,
+            "count": count,
+        }
+
+        if show_percent:
+            row["percent"] = round((count / total) * 100, percent_decimals) if total else 0.0
+
+        data["rows"].append(row)
+
     json.dump(data, file, indent=2, sort_keys=False)
-    print(file=file)  # newline
-
-
-
-
-
+    print(file=file)
+    
 
 
 

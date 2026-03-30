@@ -72,17 +72,26 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Do not show total row in output",
     )
+
     parser.add_argument(
         "--no-header",
         action="store_true",
         help="Do not show header row in table or CSV output",
     )
+
     parser.add_argument(
         "--percent-decimals",
         type=int,
         default=1,
         help="Number of decimal places for percent output",
     )
+    parser.add_argument(
+        "--no-percent",
+        dest="no_percent",
+        action="store_true",
+        help="Do not include percent column in output",
+    )
+
     parser.add_argument(
         "--version",
         action="store_true",

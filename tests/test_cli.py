@@ -205,11 +205,13 @@ def test_cli_reads_from_stdin_when_file_is_dash(tmp_path, capsys, monkeypatch):
     assert "WARNING: 1 (16.7%)" in out
     assert "DEBUG: 0 (0.0%)" in out
 
+from log_analyzer import __version__
+from log_analyzer.cli import main
+
 def test_cli_version(capsys):
-    from log_analyzer.cli import main
     main(["--version"])
     out = capsys.readouterr().out.strip()
-    assert out == "0.6.0"    
+    assert out == __version__
    
 def test_cli_csv_output(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -382,7 +384,10 @@ def test_cli_percent_decimals_negative_returns_2(tmp_path, capsys):
     assert rc == 2
     assert "percent_decimals must be >= 0" in captured.err
 
-
+def test_no_percent_table(capsys):
+    main(["-f", "data/sample.log", "--no-percent"])
+    out = capsys.readouterr().out
+    assert "%" not in out
 
 
 

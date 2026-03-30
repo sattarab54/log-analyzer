@@ -98,8 +98,8 @@ def main(argv=None) -> int:
         # --- Output format ---
         
         show_header = not args.no_header
-
         decimals = args.percent_decimals
+        show_percent = not args.no_percent
 
         if args.format == "csv":
             print_csv(
@@ -108,7 +108,8 @@ def main(argv=None) -> int:
                 total=full_total,
                 show_total=show_total,
                 show_header=show_header,
-                percent_decimals=decimals,
+                show_percent=show_percent,
+                percent_decimals=decimals,                
             )
         elif args.format == "json":
             print_json(
@@ -116,6 +117,7 @@ def main(argv=None) -> int:
                 file=target,
                 total=full_total,                
                 percent_decimals=decimals,
+                show_percent=show_percent,                
             )
         else:
             print_table(
@@ -124,7 +126,8 @@ def main(argv=None) -> int:
                 total=full_total,
                 show_total=show_total,
                 show_header=show_header,
-                percent_decimals=decimals,
+                show_percent=show_percent,
+                percent_decimals=decimals,                
             )
             
         return 0
