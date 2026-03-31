@@ -389,10 +389,43 @@ def test_no_percent_table(capsys):
     out = capsys.readouterr().out
     assert "%" not in out
 
+def test_cli_sort_by_percent(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
 
+    main(["-f", str(log_file), "--sort", "percent"])
 
+    out = capsys.readouterr().out.strip().splitlines()
 
+    data_lines = [line for line in out if ":" in line and not line.startswith("TOTAL")]
+    assert data_lines[0].startswith("INFO: 3")
+    assert data_lines[1].startswith("ERROR: 2")
+    assert data_lines[2].startswith("WARNING: 1")
+    assert data_lines[3].startswith("DEBUG: 0")
 
+def test_cli_sort_by_percent_reverse(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    main(["-f", str(log_file), "--sort", "percent", "--reverse"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    data_lines = [line for line in out if ":" in line and not line.startswith("TOTAL")]
+    assert data_lines[0].startswith("DEBUG: 0")
+    assert data_lines[1].startswith("WARNING: 1")
+    assert data_lines[2].startswith("ERROR: 2")
+    assert data_lines[3].startswith("INFO: 3")
+
+def test_cli_sort_by_percent_csv(tmp_path, capsys):
+    log_file = write_sample(tmp_path)
+
+    main(["-f", str(log_file), "--format", "csv", "--sort", "percent"])
+
+    out = capsys.readouterr().out.strip().splitlines()
+
+    assert out[1].startswith("INFO,3,")
+    assert out[2].startswith("ERROR,2,")
+    assert out[3].startswith("WARNING,1,")
+    assert out[4].startswith("DEBUG,0,")
 
 
 

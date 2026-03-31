@@ -20,15 +20,17 @@ def iter_rows(
     rows = [(lvl, int(counts.get(lvl, 0))) for lvl in lvls]
 
     if sort == "count":
-        # default: largest count first
         rows.sort(key=lambda t: (-t[1], t[0]))
-        if reverse:
-            rows.reverse()
-    else:
-        # keep given level order; reverse just flips that order
-        if reverse:
-            rows.reverse()
 
+    elif sort == "percent":
+        total = sum(counts.values())
+        rows.sort(
+            key=lambda t: (-(t[1] / total if total else 0), t[0])
+        )
+    
+    if reverse:
+        rows.reverse()
+       
     return rows
 
 def print_table(
