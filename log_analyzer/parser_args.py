@@ -34,9 +34,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--sort",
-        choices=["level", "count", "percent"],
+        choices=["level", "count", "percent", "alpha"],
         default="level",
-        help="Sort output by level order, count, or percent",
+        help="Sort output by level order, count, percent, or alphabetically",
     )
 
     parser.add_argument(

@@ -27,7 +27,9 @@ def iter_rows(
         rows.sort(
             key=lambda t: (-(t[1] / total if total else 0), t[0])
         )
-    
+    elif sort == "alpha":
+        rows.sort(key=lambda t: t[0])
+            
     if reverse:
         rows.reverse()
        

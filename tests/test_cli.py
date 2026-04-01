@@ -427,9 +427,18 @@ def test_cli_sort_by_percent_csv(tmp_path, capsys):
     assert out[3].startswith("WARNING,1,")
     assert out[4].startswith("DEBUG,0,")
 
+def test_cli_sort_alpha(capsys):
+    from log_analyzer.cli import main
 
+    main(["--sort", "alpha"])
+    captured = capsys.readouterr()
 
+    lines = [line.strip() for line in captured.out.splitlines() if line and not line.startswith("TOTAL")]
 
+    # Extract only level names
+    levels = [line.split()[0] for line in lines if line[0].isalpha()]
+
+    assert levels == sorted(levels)
 
 
 
