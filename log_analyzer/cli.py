@@ -101,6 +101,10 @@ def main(argv=None) -> int:
         decimals = args.percent_decimals
         show_percent = not args.no_percent
 
+        if args.summary_only:
+            print(f"TOTAL: {full_total}", file=target)
+            return 0
+
         if args.format == "csv":
             print_csv(
                 rows,

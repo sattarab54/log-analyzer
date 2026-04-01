@@ -74,6 +74,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--summary-only",
+        action="store_true",
+        help="Show only the total summary",
+    )
+    
+    parser.add_argument(
         "--no-header",
         action="store_true",
         help="Do not show header row in table or CSV output",

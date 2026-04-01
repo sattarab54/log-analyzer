@@ -440,6 +440,16 @@ def test_cli_sort_alpha(capsys):
 
     assert levels == sorted(levels)
 
+def test_cli_summary_only(capsys):
+    from log_analyzer.cli import main
+
+    main(["-f", "data/sample.log", "--summary-only"])
+    captured = capsys.readouterr()
+
+    assert "TOTAL:" in captured.out
+    assert "ERROR" not in captured.out
+    assert "WARNING" not in captured.out
+
 
 
 
