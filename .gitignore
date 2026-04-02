@@ -12,6 +12,7 @@ venv/
 build/
 dist/
 *.egg-info/
+*.egg-info
 
 # Test coverage
 .coverage
@@ -24,3 +25,12 @@ htmlcov/
 # OS files
 .DS_Store
 Thumbs.db
+
+# PyInstaller / packaging leftovers
+*.spec
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
