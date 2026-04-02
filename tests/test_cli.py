@@ -450,11 +450,78 @@ def test_cli_summary_only(capsys):
     assert "ERROR" not in captured.out
     assert "WARNING" not in captured.out
 
+def test_cli_since_filters_rows(tmp_path, capsys):
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n"
+        "2026-04-01 WARNING Late\n",
+        encoding="utf-8",
+    )
 
+    from log_analyzer.cli import main
+    main(["-f", str(log_file), "--since", "2026-03-10"])
 
+    out = capsys.readouterr().out
+    assert "ERROR: 1" in out
+    assert "WARNING: 1" in out
+    assert "INFO: 0" in out
 
+def test_cli_until_filters_rows(tmp_path, capsys):
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n"
+        "2026-04-01 WARNING Late\n",
+        encoding="utf-8",
+    )
 
+    from log_analyzer.cli import main
+    main(["-f", str(log_file), "--until", "2026-03-31"])
 
+    out = capsys.readouterr().out
+    assert "INFO: 1" in out
+    assert "ERROR: 1" in out
+    assert "WARNING: 0" in out
+
+def test_cli_since_and_until_filters_rows(tmp_path, capsys):
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n"
+        "2026-04-01 WARNING Late\n",
+        encoding="utf-8",
+    )
+
+    from log_analyzer.cli import main
+    main(["-f", str(log_file), "--since", "2026-03-10", "--until", "2026-03-31"])
+
+    out = capsys.readouterr().out
+    assert "ERROR: 1" in out
+    assert "INFO: 0" in out
+    assert "WARNING: 0" in out
+
+def test_cli_invalid_since_date(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "data/sample.log", "--since", "2026/03/01"])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "YYYY-MM-DD" in captured.err
+
+def test_cli_since_later_than_until(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "data/sample.log",
+        "--since", "2026-04-01",
+        "--until", "2026-03-01",
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--since cannot be later than --until" in captured.err
 
 
 

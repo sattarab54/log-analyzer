@@ -4,10 +4,9 @@ import os
 import sys
 
 from .analyzer import analyze_logs
-from .io_utils import read_file
+from .io_utils import read_file, parse_date, is_within_range
 from .output import iter_rows, print_csv, print_json, print_table
 from .parser_args import build_parser
-
 
 def main(argv=None) -> int:
     parser = build_parser()
@@ -35,6 +34,44 @@ def main(argv=None) -> int:
         print(f"Error: file '{args.file}' not found", file=sys.stderr)
         return 2
 
+    # --- Date filter ---
+    since = None
+    until = None
+
+    try:
+        since = parse_date(args.since) if args.since else None
+        until = parse_date(args.until) if args.until else None
+    except ValueError:
+        print("Error: dates must be in YYYY-MM-DD format", file=sys.stderr)
+        return 2
+
+    if since and until and since > until:
+        print("Error: --since cannot be later than --until", file=sys.stderr)
+        return 2
+    
+    if since or until:
+        filtered_lines = []
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+
+            parts = line.split(maxsplit=1)
+
+            try:
+                line_date = parse_date(parts[0])
+            except (ValueError, IndexError):
+                continue
+
+            if is_within_range(line_date, since, until):
+                if len(parts) > 1:
+                    filtered_lines.append(parts[1])
+                else:
+                    filtered_lines.append("")
+
+        lines = filtered_lines    
+                                 
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
 

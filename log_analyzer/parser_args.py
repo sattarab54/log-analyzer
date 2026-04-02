@@ -31,6 +31,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--levels",
         help="Comma-separated log levels, for example ERROR,INFO",
     )
+    
+    parser.add_argument(
+        "--since",
+        help="Filter logs from this date (inclusive), format YYYY-MM-DD",
+    )
+
+    parser.add_argument(
+        "--until",
+        help="Filter logs up to this date (inclusive), format YYYY-MM-DD",
+    )
 
     parser.add_argument(
         "--sort",
