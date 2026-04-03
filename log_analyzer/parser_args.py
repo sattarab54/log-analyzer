@@ -109,6 +109,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--summary-json",
+        action="store_true",
+        help="Show only total summary in JSON format",
+    )
+
+    parser.add_argument(
         "--version",
         action="store_true",
         help="Show version and exit",

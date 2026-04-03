@@ -523,6 +523,33 @@ def test_cli_since_later_than_until(capsys):
     assert result == 2
     assert "--since cannot be later than --until" in captured.err
 
+def test_cli_summary_json(tmp_path, capsys):
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "INFO Start\nERROR Fail\nWARNING Warn\n",
+        encoding="utf-8"
+    )
+
+    from log_analyzer.cli import main
+    main(["-f", str(log_file), "--summary-json"])
+
+    captured = capsys.readouterr()
+    assert '"TOTAL": 3' in captured.out
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

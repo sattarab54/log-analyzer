@@ -74,6 +74,11 @@ def main(argv=None) -> int:
                                  
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
+    
+    if args.summary_json:
+        import json
+        print(json.dumps({"TOTAL": full_total}))
+        return 0
 
     # Optional level filter
     levels = []
@@ -131,7 +136,8 @@ def main(argv=None) -> int:
             target = out_fh
         else:
             target = sys.stdout
-
+        
+    
         # --- Output format ---
         
         show_header = not args.no_header
