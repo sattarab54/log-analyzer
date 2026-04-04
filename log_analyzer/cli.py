@@ -2,6 +2,7 @@
 from . import __version__
 import os
 import sys
+import json
 
 from .analyzer import analyze_logs
 from .io_utils import read_file, parse_date, is_within_range
@@ -75,9 +76,26 @@ def main(argv=None) -> int:
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
     
+    if args.output_json_file and not args.summary_json:
+        print("Error: --output-json-file requires --summary-json", file=sys.stderr)
+        return 2
+
     if args.summary_json:
-        import json
-        print(json.dumps({"TOTAL": full_total}))
+        payload = json.dumps({"TOTAL": full_total})
+
+        if args.output_json_file:
+            try:
+                with open(args.output_json_file, "w", encoding="utf-8", newline="") as fh:
+                    fh.write(payload + "\n")
+            except PermissionError:
+                print(
+                    f"Error: cannot write to '{args.output_json_file}'",
+                    file=sys.stderr,
+                )
+                return 2
+            return 0
+
+        print(payload)
         return 0
 
     # Optional level filter

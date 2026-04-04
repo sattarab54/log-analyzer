@@ -19,6 +19,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--output-json-file",
+        help="Write summary JSON output to a file",
+    )
+    
+    parser.add_argument(
         "--level",
         action="append",
         type=str.upper,
