@@ -37,7 +37,6 @@ def test_cli_csv_writes_to_output_file(tmp_path, capsys):
     assert "DEBUG,0,0.0" in text
     assert "TOTAL,6,100.0" in text
     
-
 def test_cli_table_writes_to_output_file(tmp_path, capsys):
     log_file = write_sample(tmp_path)
     out_file = tmp_path / "out.txt"
@@ -534,7 +533,12 @@ def test_cli_summary_json(tmp_path, capsys):
     main(["-f", str(log_file), "--summary-json"])
 
     captured = capsys.readouterr()
-    assert '"TOTAL": 3' in captured.out
+    data = json.loads(captured.out)
+    assert data["total"] == 3
+    assert data["levels"]["ERROR"]["count"] == 1
+    assert data["levels"]["WARNING"]["count"] == 1
+    assert data["levels"]["INFO"]["count"] == 1
+    
 
 
 

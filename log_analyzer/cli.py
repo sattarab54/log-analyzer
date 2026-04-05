@@ -79,25 +79,37 @@ def main(argv=None) -> int:
     if args.output_json_file and not args.summary_json:
         print("Error: --output-json-file requires --summary-json", file=sys.stderr)
         return 2
-
+    
     if args.summary_json:
-        payload = json.dumps({"TOTAL": full_total})
+        payload = {
+            "total": full_total,
+            "levels": {}
+        }
 
-        if args.output_json_file:
-            try:
-                with open(args.output_json_file, "w", encoding="utf-8", newline="") as fh:
-                    fh.write(payload + "\n")
-            except PermissionError:
-                print(
-                    f"Error: cannot write to '{args.output_json_file}'",
-                    file=sys.stderr,
-                )
-                return 2
-            return 0
+        for level in ["ERROR", "WARNING", "INFO", "DEBUG"]:
+            count = counts.get(level, 0)
+            percent = (count / full_total * 100) if full_total else 0
+            payload["levels"][level] = {
+                "count": count,
+                "percent": round(percent, args.percent_decimals)
+            }
 
-        print(payload)
+        json_output = json.dumps(payload)
+
+        try:
+            if args.output_json_file:
+                with open(args.output_json_file, "w", encoding="utf-8") as f:
+                    f.write(json_output)
+            else:
+                print(json_output)
+        except PermissionError:
+            print(
+                f"Error: cannot write to '{args.output_json_file}'",
+                file=sys.stderr,
+            )
+            return 2
         return 0
-
+    
     # Optional level filter
     levels = []
 
