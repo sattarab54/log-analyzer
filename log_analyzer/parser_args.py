@@ -22,7 +22,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--output-json-file",
         help="Write summary JSON output to a file",
     )
-    
+        
     parser.add_argument(
         "--level",
         action="append",
@@ -117,6 +117,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--summary-json",
         action="store_true",
         help="Show only total summary in JSON format",
+    )
+
+    parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON output",
     )
 
     parser.add_argument(

@@ -80,6 +80,10 @@ def main(argv=None) -> int:
         print("Error: --output-json-file requires --summary-json", file=sys.stderr)
         return 2
     
+    if args.pretty and not args.summary_json:
+        print("Error: --pretty requires --summary-json", file=sys.stderr)
+        return 2
+    
     if args.summary_json:
         payload = {
             "total": full_total,
@@ -94,8 +98,11 @@ def main(argv=None) -> int:
                 "percent": round(percent, args.percent_decimals)
             }
 
-        json_output = json.dumps(payload)
-
+        if args.pretty:
+            json_output = json.dumps(payload, indent=2)
+        else:
+            json_output = json.dumps(payload)
+        
         try:
             if args.output_json_file:
                 with open(args.output_json_file, "w", encoding="utf-8") as f:
@@ -175,7 +182,7 @@ def main(argv=None) -> int:
         show_percent = not args.no_percent
 
         if args.summary_only:
-            print(f"TOTAL: {full_total}", file=target)
+            print(f"total": {full_total}", file=target)
             return 0
 
         if args.format == "csv":
