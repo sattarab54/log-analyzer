@@ -76,15 +76,28 @@ def main(argv=None) -> int:
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
     
-    if args.output_json_file and not args.summary_json:
-        print("Error: --output-json-file requires --summary-json", file=sys.stderr)
+    if args.output_json_file and not (args.summary_json or args.full_json):
+        print(
+            "Error: --output-json-file requires --summary-json or --full-json",
+            file=sys.stderr
+        )
         return 2
     
-    if args.pretty and not args.summary_json:
-        print("Error: --pretty requires --summary-json", file=sys.stderr)
+    if args.pretty and not (args.summary_json or args.full_json):
+        print(
+            "Error: --pretty requires --summary-json or --full-json",
+            file=sys.stderr
+        )
         return 2
-    
-    if args.summary_json:
+
+    if args.full_json and args.summary_json:
+        print(
+            "Error: cannot use --full-json with --summary-json",
+            file=sys.stderr,
+        )
+        return 2
+            
+    if args.summary_json or args.full_json:
         payload = {
             "total": full_total,
             "levels": {}
@@ -114,6 +127,7 @@ def main(argv=None) -> int:
                 f"Error: cannot write to '{args.output_json_file}'",
                 file=sys.stderr,
             )
+            
             return 2
         return 0
     
@@ -182,7 +196,7 @@ def main(argv=None) -> int:
         show_percent = not args.no_percent
 
         if args.summary_only:
-            print(f"total": {full_total}", file=target)
+            print(f"total: {full_total}", file=target)
             return 0
 
         if args.format == "csv":

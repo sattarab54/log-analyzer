@@ -120,6 +120,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--full-json",
+        action="store_true",
+        help="Output full results in JSON format",
+    )
+
+    parser.add_argument(
         "--pretty",
         action="store_true",
         help="Pretty-print JSON output",
