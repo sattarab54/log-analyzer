@@ -124,6 +124,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Output full results in JSON format",
     )
+    parser.add_argument(
+        "--indent",
+        type=int,
+        help="Indent level for JSON output (e.g. 2 or 4)",
+    )
 
     parser.add_argument(
         "--pretty",
