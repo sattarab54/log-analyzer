@@ -587,6 +587,26 @@ def test_cli_indent_must_be_non_negative(capsys):
     assert result == 2
     assert "--indent must be >= 0" in captured.err
 
+def test_cli_output_json_creates_directories(tmp_path):
+    from log_analyzer.cli import main
+    import json
+
+    log_file = tmp_path / "test.log"
+    log_file.write_text("INFO Start\nERROR Fail\n", encoding="utf-8")
+
+    output_file = tmp_path / "nested" / "dir" / "out.json"
+
+    result = main([
+        "-f", str(log_file),
+        "--full-json",
+        "--output-json-file", str(output_file)
+    ])
+
+    assert result == 0
+    assert output_file.exists()
+
+    data = json.loads(output_file.read_text())
+    assert data["total"] == 2
 
 
 

@@ -122,11 +122,15 @@ def main(argv=None) -> int:
 
         try:
             if args.output_json_file:
+                dir_path = os.path.dirname(args.output_json_file)
+                if dir_path:
+                    os.makedirs(dir_path, exist_ok=True)
+                    
                 with open(args.output_json_file, "w", encoding="utf-8") as f:
                     f.write(json_output)
             else:
                 print(json_output)
-        except PermissionError:
+        except (PermissionError, OSError):
             print(
                 f"Error: cannot write to '{args.output_json_file}'",
                 file=sys.stderr,
