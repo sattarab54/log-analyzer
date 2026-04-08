@@ -1,0 +1,21 @@
+{
+  "total": 6,
+  "levels": {
+    "ERROR": {
+      "count": 2,
+      "percent": 33.3
+    },
+    "WARNING": {
+      "count": 1,
+      "percent": 16.7
+    },
+    "INFO": {
+      "count": 3,
+      "percent": 50.0
+    },
+    "DEBUG": {
+      "count": 0,
+      "percent": 0.0
+    }
+  }
+}

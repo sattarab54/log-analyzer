@@ -82,14 +82,7 @@ def main(argv=None) -> int:
             file=sys.stderr,
         )
         return 2
-
-    if args.pretty and not (args.summary_json or args.full_json):
-        print(
-            "Error: --pretty requires --summary-json or --full-json",
-            file=sys.stderr,
-        )
-        return 2
-
+    
     if args.indent is not None and not (args.summary_json or args.full_json):
         print(
             "Error: --indent requires --summary-json or --full-json",
@@ -107,33 +100,7 @@ def main(argv=None) -> int:
             file=sys.stderr,
         )
         return 2
-
-    if args.pretty and args.indent is None:
-        args.indent = 2
-    
-    if args.output_json_file and not (args.summary_json or args.full_json):
-        print(
-            "Error: --output-json-file requires --summary-json or --full-json",
-            file=sys.stderr
-        )
-        return 2
-    
-    if args.pretty and not (args.summary_json or args.full_json):
-        print(
-            "Error: --pretty requires --summary-json or --full-json",
-            file=sys.stderr
-        )
-        return 2
-
-    
-
-    if args.full_json and args.summary_json:
-        print(
-            "Error: cannot use --full-json with --summary-json",
-            file=sys.stderr,
-        )
-        return 2
-
+                           
     if args.summary_json or args.full_json:
         payload = {
             "total": full_total,
@@ -147,10 +114,7 @@ def main(argv=None) -> int:
                 "count": count,
                 "percent": round(percent, args.percent_decimals)
             }
-
-        if args.pretty and args.indent is None:
-            args.indent = 2
-
+        
         if args.indent is not None:
             json_output = json.dumps(payload, indent=args.indent)
         else:
@@ -170,41 +134,7 @@ def main(argv=None) -> int:
             return 2
 
         return 0
-            
-    if args.summary_json or args.full_json:
-        payload = {
-            "total": full_total,
-            "levels": {}
-        }
-
-        for level in ["ERROR", "WARNING", "INFO", "DEBUG"]:
-            count = counts.get(level, 0)
-            percent = (count / full_total * 100) if full_total else 0
-            payload["levels"][level] = {
-                "count": count,
-                "percent": round(percent, args.percent_decimals)
-            }
-
-        if args.pretty and args.indent is none:
-            json_output = json.dumps(payload, indent=2)
-        else:
-            json_output = json.dumps(payload)
-        
-        try:
-            if args.output_json_file:
-                with open(args.output_json_file, "w", encoding="utf-8") as f:
-                    f.write(json_output)
-            else:
-                print(json_output)
-        except PermissionError:
-            print(
-                f"Error: cannot write to '{args.output_json_file}'",
-                file=sys.stderr,
-            )
-            
-            return 2
-        return 0
-    
+                
     # Optional level filter
     levels = []
 

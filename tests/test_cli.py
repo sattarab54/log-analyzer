@@ -538,11 +538,54 @@ def test_cli_summary_json(tmp_path, capsys):
     assert data["levels"]["ERROR"]["count"] == 1
     assert data["levels"]["WARNING"]["count"] == 1
     assert data["levels"]["INFO"]["count"] == 1
-    
 
+def test_cli_full_json_with_indent_4(tmp_path, capsys):
+    import json
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text("INFO Start\nERROR Fail\n", encoding="utf-8")
 
+    main(["-f", str(log_file), "--full-json", "--indent", "4"])
+    captured = capsys.readouterr()
 
+    data = json.loads(captured.out)
+    assert data["total"] == 2
+    assert data["levels"]["INFO"]["count"] == 1
+    assert data["levels"]["ERROR"]["count"] == 1
+    assert "\n    " in captured.out
+
+def test_cli_summary_json_with_indent_2(tmp_path, capsys):
+    import json
+    from log_analyzer.cli import main
+
+    log_file = tmp_path / "test.log"
+    log_file.write_text("INFO Start\nERROR Fail\n", encoding="utf-8")
+
+    main(["-f", str(log_file), "--summary-json", "--indent", "2"])
+    captured = capsys.readouterr()
+
+    data = json.loads(captured.out)
+    assert data["total"] == 2
+    assert "\n  " in captured.out    
+
+def test_cli_indent_requires_json_mode(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "data/sample.log", "--indent", "2"])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--indent requires --summary-json or --full-json" in captured.err
+
+def test_cli_indent_must_be_non_negative(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "data/sample.log", "--full-json", "--indent", "-1"])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--indent must be >= 0" in captured.err
 
 
 

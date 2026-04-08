@@ -129,13 +129,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Indent level for JSON output (e.g. 2 or 4)",
     )
-
-    parser.add_argument(
-        "--pretty",
-        action="store_true",
-        help="Pretty-print JSON output",
-    )
-
+    
     parser.add_argument(
         "--version",
         action="store_true",
