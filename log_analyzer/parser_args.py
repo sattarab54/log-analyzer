@@ -73,7 +73,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--output",
-        help="Write output to a file instead of stdout",
+        help="Write output to a file and infer format from extension when possible",
     )
 
     parser.add_argument(

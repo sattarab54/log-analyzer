@@ -76,6 +76,32 @@ def main(argv=None) -> int:
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
 
+    output_path = args.output
+
+    inferred_format = None
+
+    if output_path:        
+        _, ext = os.path.splitext(output_path.lower())
+
+        if ext == ".json":
+            inferred_format = "json"
+        elif ext == ".csv":
+            inferred_format = "csv"
+        elif ext == ".txt":
+            inferred_format = "table"
+        elif ext:
+            print(f"Error: cannot infer output format from '{ext}'", file=sys.stderr)
+            return 2
+
+    final_format = args.format
+
+    if output_path and inferred_format == "json" and not (args.summary_json or args.full_json):
+        args.full_json = True
+
+    if output_path and not (args.summary_json or args.full_json):
+        if inferred_format:
+            final_format = inferred_format
+    
     if args.output_json_file and not (args.summary_json or args.full_json):
         print(
             "Error: --output-json-file requires --summary-json or --full-json",
@@ -121,24 +147,39 @@ def main(argv=None) -> int:
             json_output = json.dumps(payload)
 
         try:
-            if args.output_json_file:
+            if output_path:
+                if os.path.exists(output_path) and not args.force:
+                    print(f"Error: output file already exists: {output_path}", file=sys.stderr)
+                    return 2
+
+                dir_path = os.path.dirname(output_path)
+                if dir_path:
+                    os.makedirs(dir_path, exist_ok=True)
+
+                with open(output_path, "w", encoding="utf-8") as f:
+                    f.write(json_output)
+
+            elif args.output_json_file:
                 dir_path = os.path.dirname(args.output_json_file)
                 if dir_path:
                     os.makedirs(dir_path, exist_ok=True)
-                    
+
                 with open(args.output_json_file, "w", encoding="utf-8") as f:
                     f.write(json_output)
+
             else:
                 print(json_output)
+
         except (PermissionError, OSError):
+            target_path = output_path if output_path else args.output_json_file
             print(
-                f"Error: cannot write to '{args.output_json_file}'",
+                f"Error: cannot write to '{target_path}'",
                 file=sys.stderr,
             )
             return 2
 
         return 0
-                
+                       
     # Optional level filter
     levels = []
 
@@ -207,7 +248,7 @@ def main(argv=None) -> int:
             print(f"TOTAL: {full_total}", file=target)
             return 0
 
-        if args.format == "csv":
+        if final_format == "csv":
             print_csv(
                 rows,
                 file=target,
@@ -217,7 +258,7 @@ def main(argv=None) -> int:
                 show_percent=show_percent,
                 percent_decimals=decimals,                
             )
-        elif args.format == "json":
+        elif final_format == "json":
             print_json(
                 rows,
                 file=target,
