@@ -76,7 +76,13 @@ def main(argv=None) -> int:
     counts = analyze_logs(lines)
     full_total = sum(counts.values())
 
-    output_path = args.output
+    output_path = args.output or args.output_json_file
+
+    if args.output_json_file:
+        print(
+            "Warning: --output-json-file is deprecated. Use --output instead.",
+            file=sys.stderr,
+        )
 
     inferred_format = None
 
@@ -101,14 +107,7 @@ def main(argv=None) -> int:
     if output_path and not (args.summary_json or args.full_json):
         if inferred_format:
             final_format = inferred_format
-    
-    if args.output_json_file and not (args.summary_json or args.full_json):
-        print(
-            "Error: --output-json-file requires --summary-json or --full-json",
-            file=sys.stderr,
-        )
-        return 2
-    
+           
     if args.indent is not None and not (args.summary_json or args.full_json):
         print(
             "Error: --indent requires --summary-json or --full-json",

@@ -20,7 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--output-json-file",
-        help="Write summary JSON output to a file",
+        help="(deprecated) use --output <file>.json instead",
     )
         
     parser.add_argument(
