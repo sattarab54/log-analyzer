@@ -17,7 +17,13 @@ def build_parser() -> argparse.ArgumentParser:
         default="table",
         help="Output format",
     )
-
+    parser.add_argument(
+        "--output-format",
+        choices=["auto", "json", "csv", "table"],
+        default="auto",
+        help="Output format (default: auto, inferred from file extension)",
+    )
+    
     parser.add_argument(
         "--output-json-file",
         help="(deprecated) use --output <file>.json instead",

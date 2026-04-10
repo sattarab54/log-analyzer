@@ -1,6 +1,25 @@
-level,count,percent
-ERROR,2,33.3
-WARNING,1,16.7
-INFO,3,50.0
-DEBUG,0,0.0
-TOTAL,6,100.0
+{
+  "rows": [
+    {
+      "level": "ERROR",
+      "count": 2,
+      "percent": 33.3
+    },
+    {
+      "level": "WARNING",
+      "count": 1,
+      "percent": 16.7
+    },
+    {
+      "level": "INFO",
+      "count": 3,
+      "percent": 50.0
+    },
+    {
+      "level": "DEBUG",
+      "count": 0,
+      "percent": 0.0
+    }
+  ],
+  "total": 6
+}

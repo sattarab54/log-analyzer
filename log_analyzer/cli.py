@@ -98,15 +98,19 @@ def main(argv=None) -> int:
         elif ext:
             print(f"Error: cannot infer output format from '{ext}'", file=sys.stderr)
             return 2
-
+    
     final_format = args.format
 
+    # Priority 1: explicit override
+    if args.output_format != "auto":
+        final_format = args.output_format
+
+    # Priority 2: inferred from extension
+    elif inferred_format:
+        final_format = inferred_format
+    
     if output_path and inferred_format == "json" and not (args.summary_json or args.full_json):
         args.full_json = True
-
-    if output_path and not (args.summary_json or args.full_json):
-        if inferred_format:
-            final_format = inferred_format
            
     if args.indent is not None and not (args.summary_json or args.full_json):
         print(
