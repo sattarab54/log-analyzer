@@ -151,7 +151,7 @@ def main(argv=None) -> int:
 
         try:
             if output_path:
-                if os.path.exists(output_path) and not args.force:
+                if os.path.exists(output_path) and not (args.force or args.append):
                     print(f"Error: output file already exists: {output_path}", file=sys.stderr)
                     return 2
 
@@ -223,12 +223,18 @@ def main(argv=None) -> int:
     try:
         # --- Output destination ---
         if args.output:
-            if (not args.force) and os.path.exists(args.output):
+            if args.append and args.force:
+                print("Error: cannot use --append with --force", file=sys.stderr)
+                return 2
+             
+            if (not args.force and not args.append) and os.path.exists(args.output):
                 print(f"Error: output file already exists: {args.output}", file=sys.stderr)
                 return 2
 
             try:
-                out_fh = open(args.output, "w", encoding="utf-8", newline="")
+                mode = "a" if args.append else "w"
+                out_fh = open(args.output, mode, encoding="utf-8", newline="")
+                
             except PermissionError:
                 print(
                     f"Error: cannot write to '{args.output}' (file may be open in Excel). Close it and try again.",

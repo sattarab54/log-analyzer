@@ -65,6 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Show top N results after sorting"
     )
+
     parser.add_argument(
         "--min-count",
         type=int,
@@ -86,6 +87,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--force",
         action="store_true",
         help="Overwrite output file if it already exists",
+    )
+
+    parser.add_argument(
+        "--append",
+        action="store_true",
+        help="Append output to file instead of overwriting",
     )
 
     parser.add_argument(
