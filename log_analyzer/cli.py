@@ -184,6 +184,7 @@ def main(argv=None) -> int:
         return 0
                        
     # Optional level filter
+
     levels = []
 
     if args.level:
@@ -200,7 +201,15 @@ def main(argv=None) -> int:
 
         levels.extend(extra_levels)
 
-    levels = levels if levels else None
+    seen = set()
+    clean_levels = []
+
+    for level in levels:
+        if level not in seen:
+            seen.add(level)
+            clean_levels.append(level)
+
+    levels = clean_levels if clean_levels else None
         
     # Build rows
     rows = iter_rows(counts, args.sort, args.reverse, levels=levels)
