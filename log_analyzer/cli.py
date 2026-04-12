@@ -36,21 +36,25 @@ def main(argv=None) -> int:
         return 2
 
     # --- Date filter ---
-    since = None
-    until = None
+    from datetime import datetime
+
+    since_date = None
+    until_date = None
 
     try:
-        since = parse_date(args.since) if args.since else None
-        until = parse_date(args.until) if args.until else None
+        if args.since:
+            since_date = datetime.strptime(args.since, "%Y-%m-%d").date()
+        if args.until:
+            until_date = datetime.strptime(args.until, "%Y-%m-%d").date()
     except ValueError:
         print("Error: dates must be in YYYY-MM-DD format", file=sys.stderr)
         return 2
 
-    if since and until and since > until:
+    if since_date and until_date and since_date > until_date:
         print("Error: --since cannot be later than --until", file=sys.stderr)
         return 2
     
-    if since or until:
+    if since_date or until_date:
         filtered_lines = []
 
         for line in lines:
@@ -65,11 +69,16 @@ def main(argv=None) -> int:
             except (ValueError, IndexError):
                 continue
 
-            if is_within_range(line_date, since, until):
-                if len(parts) > 1:
-                    filtered_lines.append(parts[1])
-                else:
-                    filtered_lines.append("")
+            if since_date and line_date < since_date:
+                continue
+
+            if until_date and line_date > until_date:
+                continue
+
+            if len(parts) > 1:
+                filtered_lines.append(parts[1])                                
+            else:
+                filtered_lines.append("")
 
         lines = filtered_lines    
                                  

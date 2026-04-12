@@ -45,11 +45,13 @@ def build_parser() -> argparse.ArgumentParser:
     
     parser.add_argument(
         "--since",
+        type=str,
         help="Filter logs from this date (inclusive), format YYYY-MM-DD",
     )
 
     parser.add_argument(
         "--until",
+        type=str,
         help="Filter logs up to this date (inclusive), format YYYY-MM-DD",
     )
 
