@@ -503,7 +503,7 @@ def test_cli_since_and_until_filters_rows(tmp_path, capsys):
 def test_cli_invalid_since_date(capsys):
     from log_analyzer.cli import main
 
-    result = main(["-f", "data/sample.log", "--since", "2026/03/01"])
+    result = main(["-f", "data/sample.log", "--since", "2026/13/01"])
     captured = capsys.readouterr()
 
     assert result == 2
@@ -608,7 +608,15 @@ def test_cli_output_json_creates_directories(tmp_path):
     data = json.loads(output_file.read_text())
     assert data["total"] == 2
 
+def test_cli_since_with_slashes(capsys):
+    from log_analyzer.cli import main
 
+    result = main([
+        "-f", "data/sample.log",
+        "--since", "2024/01/01"
+    ])
+
+    assert result == 0
 
 
 

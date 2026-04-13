@@ -8,6 +8,15 @@ from .analyzer import analyze_logs
 from .io_utils import read_file, parse_date, is_within_range
 from .output import iter_rows, print_csv, print_json, print_table
 from .parser_args import build_parser
+from datetime import datetime, timedelta
+
+def parse_cli_date(value):
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d"):
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError
 
 def main(argv=None) -> int:
     parser = build_parser()
@@ -43,11 +52,11 @@ def main(argv=None) -> int:
 
     try:
         if args.since:
-            since_date = datetime.strptime(args.since, "%Y-%m-%d").date()
+            since_date = parse_cli_date(args.since)
         if args.until:
-            until_date = datetime.strptime(args.until, "%Y-%m-%d").date()
+            until_date = parse_cli_date(args.until)
     except ValueError:
-        print("Error: dates must be in YYYY-MM-DD format", file=sys.stderr)
+        print("Error: invalid date. use YYYY-MM-DD or YYYY/MM/DD", file=sys.stderr)
         return 2
 
     if since_date and until_date and since_date > until_date:
