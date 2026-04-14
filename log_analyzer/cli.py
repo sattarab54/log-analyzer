@@ -45,12 +45,29 @@ def main(argv=None) -> int:
         return 2
 
     # --- Date filter ---
-    from datetime import datetime
+    from datetime import datetime, timedelta
+    
+    if (args.today or args.last_days is not None) and (args.since or args.until):
+        print("Error: cannot continue --today/--last-days with --since/--until", file=sya.stderr)
+        return 2
 
     since_date = None
     until_date = None
+    today = datetime.now().date()
+    if args.today:
+        since_date = today
+        until_date = today
 
-    try:
+    elif args.last_days is not None:
+        if args.last_days <= 0:
+            print("Error: --last-days must be > 0", file=sys.stderr)
+            return 2
+        since_date = today - timedelta(days=args.last_days - 1)
+        until_date = today
+
+
+    try:        
+                        
         if args.since:
             since_date = parse_cli_date(args.since)
         if args.until:

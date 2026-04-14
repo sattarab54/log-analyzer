@@ -618,6 +618,22 @@ def test_cli_since_with_slashes(capsys):
 
     assert result == 0
 
+def test_cli_today(capsys):
+    from log_analyzer.cli import main
+    result = main(["-f", "data/sample.log", "--today"])
+    assert result == 0
+
+
+def test_cli_last_days(capsys):
+    from log_analyzer.cli import main
+    result = main(["-f", "data/sample.log", "--last-days", "3"])
+    assert result == 0
+
+
+def test_cli_last_days_invalid(capsys):
+    from log_analyzer.cli import main
+    result = main(["-f", "data/sample.log", "--last-days", "0"])
+    assert result == 2
 
 
 

@@ -56,6 +56,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--today",
+        action="store_true",
+        help="Filter logs for today only"
+    )
+
+    parser.add_argument(
+        "--last-days",
+        type=int,
+        help="Filter logs for last N days (inclusive)"
+    )
+
+    parser.add_argument(
         "--sort",
         choices=["level", "count", "percent", "alpha"],
         default="level",
