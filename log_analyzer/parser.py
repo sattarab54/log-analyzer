@@ -1,6 +1,7 @@
 
 
 import re
+from datetime import datetime
 
 LOG_PATTERN = re.compile(
     r'^\[?(INFO|WARNING|ERROR|DEBUG)\]?\b',
@@ -13,7 +14,13 @@ def parse_line(line: str):
         return match.group(1).upper()
     return None
 
-
+def parse_cli_date(value: str):
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d"):
+        try:
+            return datetime.strptime(value, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError("Invalid date format")
 
 
 

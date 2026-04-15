@@ -4,6 +4,7 @@ import os
 import sys
 import json
 
+from log_analyzer.parser import parse_cli_date
 from .analyzer import analyze_logs
 from .io_utils import read_file, parse_date, is_within_range
 from .output import iter_rows, print_csv, print_json, print_table
