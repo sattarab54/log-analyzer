@@ -46,11 +46,36 @@ def main(argv=None) -> int:
         return 2
 
     # --- Date filter ---
-    from datetime import datetime, timedelta
-    
+    date_filter_active = any([
+        args.since, args.until, args.today, args.last_days is not None
+    ])
+
     if (args.today or args.last_days is not None) and (args.since or args.until):
-        print("Error: cannot continue --today/--last-days with --since/--until", file=sya.stderr)
+        print("Error: cannot continue --today/--last-days with --since/--until", file=sys.stderr)
         return 2
+
+    has_any_date = False
+
+    if date_filter_active:
+        for line in lines:
+            parts = line.strip().split(maxsplit=1)
+            if not parts:
+                continue
+            try:
+                _ = parse_cli_date(parts[0])
+                has_any_date = True
+                break
+            except ValueError:
+                continue
+
+        if not has_any_date:
+            print(
+                "Error: date filtering requires log lines to start with YYYY-MM-DD or YYYY/MM/DD",
+                file=sys.stderr,
+            )
+            return 2
+
+    
 
     since_date = None
     until_date = None

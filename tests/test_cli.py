@@ -500,20 +500,36 @@ def test_cli_since_and_until_filters_rows(tmp_path, capsys):
     assert "INFO: 0" in out
     assert "WARNING: 0" in out
 
-def test_cli_invalid_since_date(capsys):
+def test_cli_invalid_since_date(tmp_path, capsys):
     from log_analyzer.cli import main
 
-    result = main(["-f", "data/sample.log", "--since", "2026/13/01"])
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--since", "invalid-date",
+    ])
     captured = capsys.readouterr()
 
     assert result == 2
-    assert "YYYY-MM-DD" in captured.err
+    assert "invalid date" in captured.err.lower()
 
-def test_cli_since_later_than_until(capsys):
+def test_cli_since_later_than_until(tmp_path, capsys):
     from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n",
+        encoding="utf-8",
+    )
+
     result = main([
-        "-f", "data/sample.log",
+        "-f", str(log_file),
         "--since", "2026-04-01",
         "--until", "2026-03-01",
     ])
@@ -608,33 +624,91 @@ def test_cli_output_json_creates_directories(tmp_path):
     data = json.loads(output_file.read_text())
     assert data["total"] == 2
 
-def test_cli_since_with_slashes(capsys):
+def test_cli_since_with_slashes(tmp_path, capsys):
     from log_analyzer.cli import main
+
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2024-01-01 INFO Start\n"
+        "2024-01-02 ERROR Fail\n",
+        encoding="utf-8",
+    )
 
     result = main([
-        "-f", "data/sample.log",
-        "--since", "2024/01/01"
+        "-f", str(log_file),
+        "--since", "2024/01/01",
     ])
+    captured = capsys.readouterr()
 
     assert result == 0
+    assert "INFO: 1" in captured.out
+    assert "ERROR: 1" in captured.out
 
-def test_cli_today(capsys):
+def test_cli_today(tmp_path, capsys):
+    from datetime import datetime
     from log_analyzer.cli import main
-    result = main(["-f", "data/sample.log", "--today"])
+
+    today = datetime.now().date().isoformat()
+
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        f"{today} INFO Start\n",
+        encoding="utf-8",
+    )
+
+    result = main(["-f", str(log_file), "--today"])
+    captured = capsys.readouterr()
+
     assert result == 0
+    assert "INFO: 1" in captured.out
 
-
-def test_cli_last_days(capsys):
+def test_cli_last_days(tmp_path, capsys):
+    from datetime import datetime, timedelta
     from log_analyzer.cli import main
-    result = main(["-f", "data/sample.log", "--last-days", "3"])
+
+    today = datetime.now().date()
+    within_range = (today - timedelta(days=2)).isoformat()
+    too_old = (today - timedelta(days=10)).isoformat()
+
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        f"{within_range} ERROR Fail\n{too_old} INFO Old\n",
+        encoding="utf-8",
+    )
+
+    result = main(["-f", str(log_file), "--last-days", "3"])
+    captured = capsys.readouterr()
+
     assert result == 0
+    assert "ERROR: 1" in captured.out
+    assert "INFO: 0" in captured.out
 
-
-def test_cli_last_days_invalid(capsys):
+def test_cli_last_days_invalid(tmp_path, capsys):
     from log_analyzer.cli import main
-    result = main(["-f", "data/sample.log", "--last-days", "0"])
+
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--last-days", "0",
+    ])
+    captured = capsys.readouterr()
+
     assert result == 2
+    assert "--last-days must be > 0" in captured.err
 
+def test_date_filter_requires_dated_lines(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "data/sample.log", "--today"])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "date filtering requires log lines" in captured.err
 
 
 
