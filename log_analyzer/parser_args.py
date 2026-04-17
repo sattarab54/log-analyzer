@@ -68,6 +68,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--date-summary",
+        action="store_true",
+        help="Show counts grouped by date",
+    )
+
+    parser.add_argument(
         "--sort",
         choices=["level", "count", "percent", "alpha"],
         default="level",

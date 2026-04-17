@@ -4,12 +4,49 @@ import os
 import sys
 import json
 
-from log_analyzer.parser import parse_cli_date
+from log_analyzer.parser import parse_cli_date, parse_line
 from .analyzer import analyze_logs
 from .io_utils import read_file, parse_date, is_within_range
 from .output import iter_rows, print_csv, print_json, print_table
 from .parser_args import build_parser
 from datetime import datetime, timedelta
+from collections import OrderedDict
+
+def build_date_summary(lines):
+    summary = OrderedDict()
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        parts = line.split(maxsplit=1)
+        if len(parts) < 2:
+            continue
+
+        try:
+            line_date = parse_cli_date(parts[0])
+        except ValueError:
+            continue
+
+        rest = parts[1]
+        level = parse_line(rest)
+        if level is None:
+            continue
+
+        date_key = line_date.isoformat()
+
+        if date_key not in summary:
+            summary[date_key] = {
+                "ERROR": 0,
+                "WARNING": 0,
+                "INFO": 0,
+                "DEBUG": 0,
+            }
+
+        summary[date_key][level] += 1
+
+    return summary
 
 def parse_cli_date(value):
     for fmt in ("%Y-%m-%d", "%Y/%m/%d"):
@@ -127,16 +164,19 @@ def main(argv=None) -> int:
             if until_date and line_date > until_date:
                 continue
 
-            if len(parts) > 1:
-                filtered_lines.append(parts[1])                                
+            if args.date_summary:
+                filtered_lines.append(line)
             else:
-                filtered_lines.append("")
-
-        lines = filtered_lines    
-                                 
-    counts = analyze_logs(lines)
+                if len(parts) > 1:
+                    filtered_lines.append(parts[1])
+                else:
+                    filtered_lines.append("")
+                                                                            
+        lines = filtered_lines
+                
+    counts = analyze_logs(lines)   
     full_total = sum(counts.values())
-
+    
     output_path = args.output or args.output_json_file
 
     if args.output_json_file:
@@ -315,8 +355,24 @@ def main(argv=None) -> int:
             target = out_fh
         else:
             target = sys.stdout
-        
-    
+
+        if args.date_summary:
+            summary = build_date_summary(lines)
+
+            for date_key, counts_by_level in summary.items():
+                total = sum(counts_by_level.values())
+                print(
+                    f"{date_key}  "
+                    f"ERROR: {counts_by_level['ERROR']}  "
+                    f"WARNING: {counts_by_level['WARNING']}  "
+                    f"INFO: {counts_by_level['INFO']}  "
+                    f"DEBUG: {counts_by_level['DEBUG']}  "
+                    f"TOTAL: {total}",
+                    file=target,
+                )
+
+            return 0
+           
         # --- Output format ---
         
         show_header = not args.no_header
