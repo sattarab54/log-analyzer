@@ -88,12 +88,12 @@ def main(argv=None) -> int:
     ])
 
     if (args.today or args.last_days is not None) and (args.since or args.until):
-        print("Error: cannot continue --today/--last-days with --since/--until", file=sys.stderr)
+        print("Error: cannot combine --today/--last-days with --since/--until", file=sys.stderr)
         return 2
 
     has_any_date = False
 
-    if date_filter_active:
+    if date_filter_active or args.date_summary:
         for line in lines:
             parts = line.strip().split(maxsplit=1)
             if not parts:
@@ -105,15 +105,14 @@ def main(argv=None) -> int:
             except ValueError:
                 continue
 
+    if date_filter_active or args.date_summary:
         if not has_any_date:
             print(
                 "Error: date filtering requires log lines to start with YYYY-MM-DD or YYYY/MM/DD",
                 file=sys.stderr,
             )
             return 2
-
-    
-
+        
     since_date = None
     until_date = None
     today = datetime.now().date()
@@ -127,7 +126,6 @@ def main(argv=None) -> int:
             return 2
         since_date = today - timedelta(days=args.last_days - 1)
         until_date = today
-
 
     try:        
                         
@@ -355,10 +353,26 @@ def main(argv=None) -> int:
             target = out_fh
         else:
             target = sys.stdout
-
+            
         if args.date_summary:
             summary = build_date_summary(lines)
 
+            if final_format == "json":
+                result = {}
+                for date_key, counts_by_level in summary.items():
+                    total = sum(counts_by_level.values())
+                    result[date_key] = {
+                        **counts_by_level,
+                        "TOTAL": total
+                    }
+                if args.indent is not None:
+                    json.dump(result, target, indent=args.indent)
+                else:
+                    json.dump(result, target)
+                print(file=target)            
+                return 0
+
+            # NON_JSON OUTPUT (this was broken)
             for date_key, counts_by_level in summary.items():
                 total = sum(counts_by_level.values())
                 print(

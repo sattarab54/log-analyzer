@@ -710,7 +710,68 @@ def test_date_filter_requires_dated_lines(capsys):
     assert result == 2
     assert "date filtering requires log lines" in captured.err
 
+def test_cli_date_summary_basic(capsys):
+    from log_analyzer.cli import main
 
+    result = main(["-f", "dated.log", "--date-summary"])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert "2026-03-01" in captured.out
+    assert "2026-03-15" in captured.out
+    assert "2026-04-01" in captured.out
+
+def test_cli_date_summary_since(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--since", "2026-03-10",
+        "--date-summary"
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert "2026-03-01" not in captured.out
+    assert "2026-03-15" in captured.out
+    assert "2026-04-01" in captured.out
+
+def test_cli_date_summary_no_dates(capsys, tmp_path):
+    from log_analyzer.cli import main
+
+    f = tmp_path / "nodate.log"
+    f.write_text("INFO Start\nERROR Fail\n")
+
+    result = main(["-f", str(f), "--date-summary"])
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "date filtering requires" in captured.err
+
+def test_cli_date_summary_json(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "dated.log", "--date-summary", "--format", "json"])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert '"2026-03-01"' in captured.out
+    assert '"TOTAL": 1' in captured.out
+
+def test_cli_date_summary_json_since(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--since", "2026-03-10",
+        "--date-summary",
+        "--format", "json"
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert '"2026-03-01"' not in captured.out
+    assert '"2026-03-15"' in captured.out
 
 
 

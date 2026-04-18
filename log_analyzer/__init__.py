@@ -7,4 +7,4 @@ from .parser import parse_line
 
 __all__ = ["analyze_logs", "parse_line"]
 
-__version__ = "0.31.0"
+__version__ = "0.32.0"
