@@ -367,6 +367,9 @@ def main(argv=None) -> int:
                     reverse=True,
                 )
 
+            if args.reverse:
+                summary_items.reverse()
+
             if final_format == "json":
                 result = {}
                 for date_key, counts_by_level in summary_items:

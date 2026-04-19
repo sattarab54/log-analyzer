@@ -848,6 +848,21 @@ def test_cli_date_summary_sort_total(tmp_path, capsys):
     assert lines[1].startswith("2026-03-01")
     assert lines[2].startswith("2026-03-15")
 
+def test_cli_date_summary_reverse_date(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--sort", "date",
+        "--reverse"
+    ])
+
+    captured = capsys.readouterr()
+
+    assert result == 0
+    lines = [l for l in captured.out.splitlines() if l.strip()]
+    assert lines[0].startswith("2026-04-01")
 
 
 
