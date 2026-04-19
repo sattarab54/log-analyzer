@@ -773,6 +773,86 @@ def test_cli_date_summary_json_since(capsys):
     assert '"2026-03-01"' not in captured.out
     assert '"2026-03-15"' in captured.out
 
+def test_cli_date_summary_csv(capsys):
+    from log_analyzer.cli import main
+
+    result = main(["-f", "dated.log", "--date-summary", "--format", "csv"])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert "date,ERROR,WARNING,INFO,DEBUG,TOTAL" in captured.out
+    assert "2026-03-01,0,0,1,0,1" in captured.out
+    assert "2026-03-15,1,0,0,0,1" in captured.out
+    assert "2026-04-01,0,1,0,0,1" in captured.out
+
+
+def test_cli_date_summary_csv_since(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--since", "2026-03-10",
+        "--date-summary",
+        "--format", "csv",
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert "date,ERROR,WARNING,INFO,DEBUG,TOTAL" in captured.out
+    assert "2026-03-01" not in captured.out
+    assert "2026-03-15,1,0,0,0,1" in captured.out
+    assert "2026-04-01,0,1,0,0,1" in captured.out
+
+def test_cli_date_summary_sort_date(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--sort", "date",
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 0
+
+    lines = [line for line in captured.out.splitlines() if line.strip()]
+    assert lines[0].startswith("2026-03-01")
+    assert lines[1].startswith("2026-03-15")
+    assert lines[2].startswith("2026-04-01")
+
+def test_cli_date_summary_sort_total(tmp_path, capsys):
+    from log_analyzer.cli import main
+
+    log_file = tmp_path / "dated_many.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-01 ERROR Fail\n"
+        "2026-03-15 WARNING Late\n"
+        "2026-04-01 INFO A\n"
+        "2026-04-01 INFO B\n"
+        "2026-04-01 DEBUG C\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--sort", "total",
+    ])
+    captured = capsys.readouterr()
+
+    assert result == 0
+
+    lines = [line for line in captured.out.splitlines() if line.strip()]
+    assert lines[0].startswith("2026-04-01")
+    assert lines[1].startswith("2026-03-01")
+    assert lines[2].startswith("2026-03-15")
+
+
+
+
+
+
 
 
 

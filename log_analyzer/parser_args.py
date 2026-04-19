@@ -75,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--sort",
-        choices=["level", "count", "percent", "alpha"],
+        choices=["level", "count", "percent", "alpha", "date", "total"],
         default="level",
         help="Sort output by level order, count, percent, or alphabetically",
     )

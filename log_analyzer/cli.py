@@ -353,39 +353,64 @@ def main(argv=None) -> int:
             target = out_fh
         else:
             target = sys.stdout
-            
+
         if args.date_summary:
             summary = build_date_summary(lines)
+            summary_items = list(summary.items())
+
+            if args.sort == "date":
+                summary_items.sort(key=lambda item: item[0])
+
+            elif args.sort == "total":
+                summary_items.sort(
+                    key=lambda item: sum(item[1].values()),
+                    reverse=True,
+                )
 
             if final_format == "json":
                 result = {}
-                for date_key, counts_by_level in summary.items():
+                for date_key, counts_by_level in summary_items:
                     total = sum(counts_by_level.values())
                     result[date_key] = {
                         **counts_by_level,
-                        "TOTAL": total
+                        "TOTAL": total,
                     }
+
                 if args.indent is not None:
                     json.dump(result, target, indent=args.indent)
                 else:
                     json.dump(result, target)
-                print(file=target)            
+                print(file=target)
                 return 0
 
-            # NON_JSON OUTPUT (this was broken)
-            for date_key, counts_by_level in summary.items():
+            if final_format == "csv":
+                print("date,ERROR,WARNING,INFO,DEBUG,TOTAL", file=target)
+                for date_key, counts_by_level in summary_items:
+                    total = sum(counts_by_level.values())
+                    print(
+                        f"{date_key},"
+                        f"{counts_by_level['ERROR']},"
+                        f"{counts_by_level['WARNING']},"
+                        f"{counts_by_level['INFO']},"
+                        f"{counts_by_level['DEBUG']},"
+                        f"{total}",
+                        file=target,
+                    )
+                return 0
+
+            for date_key, counts_by_level in summary_items:
                 total = sum(counts_by_level.values())
                 print(
-                    f"{date_key}  "
-                    f"ERROR: {counts_by_level['ERROR']}  "
-                    f"WARNING: {counts_by_level['WARNING']}  "
-                    f"INFO: {counts_by_level['INFO']}  "
-                    f"DEBUG: {counts_by_level['DEBUG']}  "
+                    f"{date_key} "
+                    f"ERROR: {counts_by_level['ERROR']} "
+                    f"WARNING: {counts_by_level['WARNING']} "
+                    f"INFO: {counts_by_level['INFO']} "
+                    f"DEBUG: {counts_by_level['DEBUG']} "
                     f"TOTAL: {total}",
                     file=target,
                 )
 
-            return 0
+            return 0    
            
         # --- Output format ---
         
