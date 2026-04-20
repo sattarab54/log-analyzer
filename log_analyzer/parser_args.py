@@ -74,6 +74,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--min-total",
+        type=int,
+        help="Minimum TOTAL count to include in date summary",
+    )
+
+    parser.add_argument(
         "--sort",
         choices=["level", "count", "percent", "alpha", "date", "total"],
         default="level",

@@ -358,6 +358,18 @@ def main(argv=None) -> int:
             summary = build_date_summary(lines)
             summary_items = list(summary.items())
 
+            summary_items = list(summary.items())
+
+            if args.min_total is not None:
+                summary_items = [
+                    (date_key, counts)
+                    for date_key, counts in summary_items
+                    if sum(counts.values()) >= args.min_total
+                ]
+            if args.min_total is not None and args.min_total < 0:
+                print("Error: --min-total must be >= 0", file=sys.stderr)
+                return 2
+            
             if args.sort == "date":
                 summary_items.sort(key=lambda item: item[0])
 
