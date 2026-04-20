@@ -79,7 +79,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="level",
         help="Sort output by level order, count, percent, or alphabetically",
     )
-
+        
     parser.add_argument(
         "--top",
         type=int,
@@ -96,6 +96,12 @@ def build_parser() -> argparse.ArgumentParser:
         "--reverse",
         action="store_true",
         help="Reverse the final output order",
+    )
+
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Limit number of date summary rows",
     )
 
     parser.add_argument(

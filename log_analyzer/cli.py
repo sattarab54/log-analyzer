@@ -370,6 +370,13 @@ def main(argv=None) -> int:
             if args.reverse:
                 summary_items.reverse()
 
+            if args.limit is not None:
+                summary_items = summary_items[:args.limit]
+
+            if args.limit is not None and args.limit <= 0:
+                print("Error: --limit must be > 0", file=sys.stderr)
+                return 2
+
             if final_format == "json":
                 result = {}
                 for date_key, counts_by_level in summary_items:

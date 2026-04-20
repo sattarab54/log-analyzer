@@ -864,9 +864,38 @@ def test_cli_date_summary_reverse_date(capsys):
     lines = [l for l in captured.out.splitlines() if l.strip()]
     assert lines[0].startswith("2026-04-01")
 
+def test_cli_date_summary_limit(capsys):
+    from log_analyzer.cli import main
 
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--sort", "total",
+        "--limit", "1",
+    ])
 
+    captured = capsys.readouterr()
+    lines = [l for l in captured.out.splitlines() if l.strip()]
 
+    assert result == 0
+    assert len(lines) == 1
+
+def test_cli_date_summary_limit_reverse(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--sort", "date",
+        "--reverse",
+        "--limit", "1",
+    ])
+
+    captured = capsys.readouterr()
+    lines = [l for l in captured.out.splitlines() if l.strip()]
+
+    assert result == 0
+    assert lines[0].startswith("2026-04-01")
 
 
 
