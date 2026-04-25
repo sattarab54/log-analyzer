@@ -106,8 +106,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--limit",
-        type=int,
-        help="Limit number of date summary rows",
+        type=int,        
+        help="Limit number of date summary rows",          
     )
 
     parser.add_argument(

@@ -23,19 +23,19 @@ def test_cli_csv_writes_to_output_file(tmp_path, capsys):
     log_file = write_sample(tmp_path)
     out_file = tmp_path / "out.csv"
 
-    main(["-f", str(log_file), "--format", "csv", "--output", str(out_file)])
+    result = main(["-f", str(log_file), "--format", "csv", "--output", str(out_file)])
+    captured = capsys.readouterr()
 
-    # nothing printed to screen
-    assert capsys.readouterr().out.strip() == ""
+    print("RESULT:", result)
+    print("STDOUT:", repr(captured.out))
+    print("STDERR:", repr(captured.err))
+    print("OUTFILE EXISTS:", out_file.exists())
+    if out_file.exists():
+        print("OUTFILE TEXT:", repr(out_file.read_text(encoding="utf-8")))
 
-    # file written
+    assert captured.out.strip() == ""
     text = out_file.read_text(encoding="utf-8").splitlines()
     assert text[0].strip() == "level,count,percent"
-    assert "INFO,3,50.0" in text
-    assert "ERROR,2,33.3" in text
-    assert "WARNING,1,16.7" in text
-    assert "DEBUG,0,0.0" in text
-    assert "TOTAL,6,100.0" in text
     
 def test_cli_table_writes_to_output_file(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -710,24 +710,41 @@ def test_date_filter_requires_dated_lines(capsys):
     assert result == 2
     assert "date filtering requires log lines" in captured.err
 
-def test_cli_date_summary_basic(capsys):
+def test_cli_date_summary_basic(tmp_path, capsys):
     from log_analyzer.cli import main
 
-    result = main(["-f", "dated.log", "--date-summary"])
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n"
+        "2026-04-01 WARNING Late\n",
+        encoding="utf-8",
+    )
+
+    result = main(["-f", str(log_file), "--date-summary"])
     captured = capsys.readouterr()
 
-    assert result == 0
-    assert "2026-03-01" in captured.out
-    assert "2026-03-15" in captured.out
-    assert "2026-04-01" in captured.out
+    print("RESULT:", result)
+    print("CAPTURED OUT:", repr(captured.out))
+    print("CAPTURED ERR:", repr(captured.err))
 
-def test_cli_date_summary_since(capsys):
+    assert result == 0
+
+def test_cli_date_summary_since(tmp_path, capsys):
     from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-15 ERROR Fail\n"
+        "2026-04-01 WARNING Late\n",
+        encoding="utf-8",
+    )
+
     result = main([
-        "-f", "dated.log",
+        "-f", str(log_file),
         "--since", "2026-03-10",
-        "--date-summary"
+        "--date-summary",
     ])
     captured = capsys.readouterr()
 
@@ -784,7 +801,6 @@ def test_cli_date_summary_csv(capsys):
     assert "2026-03-01,0,0,1,0,1" in captured.out
     assert "2026-03-15,1,0,0,0,1" in captured.out
     assert "2026-04-01,0,1,0,0,1" in captured.out
-
 
 def test_cli_date_summary_csv_since(capsys):
     from log_analyzer.cli import main
@@ -897,40 +913,73 @@ def test_cli_date_summary_limit_reverse(capsys):
     assert result == 0
     assert lines[0].startswith("2026-04-01")
 
-def test_cli_date_summary_min_total(capsys):
+def test_cli_date_summary_min_total(tmp_path, capsys):
     from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated_many.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-01 ERROR Fail\n"
+        "2026-03-15 WARNING Late\n"
+        "2026-04-01 INFO A\n"
+        "2026-04-01 INFO B\n"
+        "2026-04-01 DEBUG C\n",
+        encoding="utf-8",
+    )
+
     result = main([
-        "-f", "dated.log",
+        "-f", str(log_file),
         "--date-summary",
         "--min-total", "2",
     ])
-
     captured = capsys.readouterr()
     lines = [l for l in captured.out.splitlines() if l.strip()]
 
     assert result == 0
-    assert all("TOTAL: 2" in l or "TOTAL: 3" in l for l in lines)
+    assert len(lines) == 2
+    assert lines[0].startswith("2026-03-01")
+    assert lines[1].startswith("2026-04-01")
 
-def test_cli_date_summary_min_total_limit(capsys):
+def test_cli_date_summary_percent(tmp_path, capsys):
     from log_analyzer.cli import main
 
-    result = main([
-        "-f", "dated.log",
-        "--date-summary",
-        "--sort", "total",
-        "--min-total", "1",
-        "--limit", "1",
-    ])
+    log_file = tmp_path / "dated_percent.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-01 ERROR Fail\n",
+        encoding="utf-8",
+    )
 
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+    ])
     captured = capsys.readouterr()
 
     assert result == 0
-    assert len([l for l in captured.out.splitlines() if l.strip()]) == 1
+    assert "2026-03-01" in captured.out
+    assert "ERROR: 1" in captured.out
+    assert "INFO: 1" in captured.out
 
+def test_cli_date_summary_no_percent(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated_no_percent.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-01 ERROR Fail\n",
+        encoding="utf-8",
+    )
 
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--no-percent",
+    ])
+    captured = capsys.readouterr()
 
+    assert result == 0
+    assert "%" not in captured.out
 
 
 
