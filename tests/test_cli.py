@@ -981,6 +981,36 @@ def test_cli_date_summary_no_percent(tmp_path, capsys):
     assert result == 0
     assert "%" not in captured.out
 
+def test_summary_shortcut_equivalence(tmp_path, capsys):
+    from log_analyzer.cli import main
+
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-01 INFO B\n"
+        "2026-03-02 ERROR X\n"
+    )
+
+    # Run with --summary
+    main(["-f", str(log_file), "--summary"])
+    out_summary = capsys.readouterr().out
+
+    # Run with full equivalent
+    main(["-f", str(log_file), "--date-summary", "--sort", "total"])
+    out_full = capsys.readouterr().out
+
+    assert out_summary == out_full
+
+
+
+
+
+
+
+
+
+
+
 
 
 

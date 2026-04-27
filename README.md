@@ -1,9 +1,158 @@
 
-# log-analyzer
+## Quick Start
+
+```bash
+
+log-analyzer -f sample.log
+log-analyzer -f sample.log --format csv
+log-analyzer -f dated.log --date-summary
 
 A small CLI tool that reads a log file, counts log levels, and outputs the counts in a chosen format.
 CLI tool to count log levels (INFO/WARNING/ERROR/DEBUG) in a log file.
----
+
+## Date Summary
+
+Group logs by date and count levels per day:
+
+```bash
+log-analyzer -f dated.log --date-summary
+```
+
+#### Sort by date
+
+```bash
+log-analyzer -f dated.log --date-summary --sort date
+```
+
+#### Sort by total count
+
+```bash
+log-analyzer -f dated.log --date-summary --sort total
+```
+
+#### Reverse order
+
+```bash
+log-analyzer -f dated.log --date-summary --sort date --reverse
+```
+
+#### Mininmum total filter
+
+``bash
+Show only dates with total logs >= N:
+log-analyzer -f dated.log --date-summary --min-total 2
+```
+
+#### Limit number of rows
+
+```bash
+log-analyzer -f dated.log --date-summary --limit 2
+```
+
+### CSV output
+
+```bash
+log-analyzer -f dated.log --date-summary --format csv
+```
+
+### JSON output
+
+```bash
+log-analyzer -f dated.log --date-summary --format json --indent 2
+```
+
+### Example output
+
+```text
+2026-03-01 ERROR: 1 (50.0%) WARNING: 0 (0.0%) INFO: 1 (50.0%) DEBUG: 0 (0.0%) TOTAL: 2
+2026-04-01 ERROR: 0 (0.0%) WARNING: 0 (0.0%) INFO: 2 (66.7%) DEBUG: 1 (33.3%) TOTAL: 3
+```
+## Date Filtering
+
+Filter logs by date before counting or summarizing.
+
+### Since date
+
+```bash
+log-analyzer -f dated.log --since 2026-03-10
+```
+### Until date
+
+```bash
+log-analyzer -f dated.log --until 2026-04-01
+```
+### Since and until together
+
+```bash
+log-analyzer -f dated.log --since 2026-03-10 --until 2026-04-01
+```
+### Today only
+
+```bash
+log-analyzer -f dated.log --today
+```
+### Last N days
+
+```bash
+log-analyzer -f dated.log --last-days 7
+```
+
+### Date filtering with date summary
+
+```bash
+log-analyzer -f dated.log --since 2026-03-10 --date-summary
+```
+
+### Combined Usage Examples
+
+Use multiple options together for more control.
+
+### Date range + summary + sort
+
+```bash
+log-analyzer -f dated.log --since 2026-03-01 --until 2026-04-01 --date-summary --sort total
+```
+
+### Date summary + minimum total + limit
+
+```bash
+log-analyzer -f dated.log --date-summary --min-total 2 --limit 3
+```
+
+### Date summary + reverse order
+
+```bash
+log-analyzer -f dated.log --date-summary --sort date --reverse
+```
+
+### Date filtering + CSV output
+
+```bash
+log-analyzer -f dated.log --since 2026-03-01 --format csv
+```
+
+### Date filtering + JSON output
+
+```bash
+log-analyzer -f dated.log --last-days 7 --format json --indent 2
+```
+
+### Summary shortcut
+
+```bash
+log-analyzer -f dated.log --summary
+```
+Equivalent to:
+
+```bash
+log-analyzer -f dated.log --date-summary --sort total
+```
+
+### Combine multiple options for more control.
+
+```bash
+log-analyzer -f dated.log --since 2026-03-01 --until 2026-04-01 --date-summary --min-total 2 --sort total --reverse --limit 5 --format json --indent 2
+```
 
 ## Install (editable / development)
 
@@ -13,29 +162,21 @@ From the project root:
 pip install -e .
 ```
 
----
-
-## Run
-
 Show help:
-
-```bash
-logan -h
+bash
+log-analyzer -h
 ```
-
 Run with default settings  
 (uses data/sample.log, table format, sorted by level):
 
 ```bash
 logan
 ```
-
 Specify a log file:
 
 ```bash
 logan -f data/sample.log
 ```
-
 ---
 
 ## Output formats

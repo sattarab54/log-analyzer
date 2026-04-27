@@ -59,6 +59,10 @@ def parse_cli_date(value):
 def main(argv=None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+
+    if args.summary:
+        args.date_summary = True
+        args.sort = "total"
     
     if args.version:
         print(__version__)

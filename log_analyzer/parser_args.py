@@ -165,6 +165,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--summary",
+        action="store_true",
+        help="Shortcut for --date-summary sorted by total"
+    )
+
+    parser.add_argument(
         "--full-json",
         action="store_true",
         help="Output full results in JSON format",
