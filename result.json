@@ -1,1 +1,1 @@
-{"total": 6, "levels": {"ERROR": {"count": 2, "percent": 33.3}, "WARNING": {"count": 1, "percent": 16.7}, "INFO": {"count": 3, "percent": 50.0}, "DEBUG": {"count": 0, "percent": 0.0}}}
+{"2026-03-01": {"ERROR": 0, "WARNING": 0, "INFO": 1, "DEBUG": 0, "TOTAL": 1}, "2026-03-15": {"ERROR": 1, "WARNING": 0, "INFO": 0, "DEBUG": 0, "TOTAL": 1}, "2026-04-01": {"ERROR": 0, "WARNING": 1, "INFO": 0, "DEBUG": 0, "TOTAL": 1}}

@@ -1,4 +1,4 @@
-
+\
 from . import __version__
 import os
 import sys
@@ -63,6 +63,10 @@ def main(argv=None) -> int:
     if args.summary:
         args.date_summary = True
         args.sort = "total"
+
+    if args.summary and args.format is None:
+        args.format = "table"
+
     
     if args.version:
         print(__version__)
@@ -211,7 +215,7 @@ def main(argv=None) -> int:
     elif inferred_format:
         final_format = inferred_format
     
-    if output_path and inferred_format == "json" and not (args.summary_json or args.full_json):
+    if output_path and inferred_format == "json" and not args.date_summary and not(args.summary_json or args.full_json):
         args.full_json = True
            
     if args.indent is not None and not (args.summary_json or args.full_json):
@@ -232,7 +236,7 @@ def main(argv=None) -> int:
         )
         return 2
                            
-    if args.summary_json or args.full_json:
+    if (args.summary_json or args.full_json) and not args.date_summary:
         payload = {
             "total": full_total,
             "levels": {}
@@ -394,13 +398,19 @@ def main(argv=None) -> int:
 
             decimals = args.percent_decimals
             
-            if final_format == "json":                                
-                result = {}
-                for date_key, counts_by_level in summary_items:
-                    total = sum(counts_by_level.values())
-                    result[date_key] = {
-                        **counts_by_level,
-                        "TOTAL": total,
+            if final_format == "json":
+                if args.date_summary or args.summary:
+                    result = {}
+                    for date_key, counts_by_level in summary_items:
+                        total = sum(counts_by_level.values())
+                        result[date_key] = {
+                            **counts_by_level,
+                            "TOTAL": total,
+                        }
+                else:
+                    result = {
+                        "levels": counts,
+                        "total": full_total,
                     }
 
                 if args.indent is not None:

@@ -1,7 +1,3 @@
-level  count percent
-ERROR: 2 (33.3%)
-WARNING: 1 (16.7%)
-INFO: 3 (50.0%)
-DEBUG: 0 (0.0%)
-____________________
-TOTAL: 6
+2026-03-01 ERROR: 0 (0.0%) WARNING: 0 (0.0%) INFO: 1 (100.0%) DEBUG: 0 (0.0%) TOTAL: 1
+2026-03-15 ERROR: 1 (100.0%) WARNING: 0 (0.0%) INFO: 0 (0.0%) DEBUG: 0 (0.0%) TOTAL: 1
+2026-04-01 ERROR: 0 (0.0%) WARNING: 1 (100.0%) INFO: 0 (0.0%) DEBUG: 0 (0.0%) TOTAL: 1

@@ -1001,6 +1001,52 @@ def test_summary_shortcut_equivalence(tmp_path, capsys):
 
     assert out_summary == out_full
 
+def test_output_file(tmp_path):
+    from log_analyzer.cli import main
+
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-01 ERROR B\n",
+        encoding="utf-8"
+    )
+
+    output_file = tmp_path / "result.txt"
+
+    result = main([
+        "-f", str(log_file),
+        "--summary",
+        "--output", str(output_file)
+    ])
+
+    assert result == 0
+    assert output_file.exists()
+
+    content = output_file.read_text()
+    assert "2026-03-01" in content
+    assert "TOTAL" in content
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
