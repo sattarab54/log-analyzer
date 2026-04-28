@@ -349,7 +349,7 @@ def main(argv=None) -> int:
 
             try:
                 mode = "a" if args.append else "w"
-                out_fh = open(args.output, mode, encoding="utf-8", newline="")
+                out_fh = open(output_path, mode, encoding="utf-8", newline="")
                 
             except PermissionError:
                 print(

@@ -1026,7 +1026,22 @@ def test_output_file(tmp_path):
     assert "2026-03-01" in content
     assert "TOTAL" in content
 
+def test_output_append(tmp_path):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n",
+        encoding="utf-8"
+    )
+
+    output_file = tmp_path / "result.txt"
+
+    main(["-f", str(log_file), "--summary", "--output", str(output_file), "--force"])
+    main(["-f", str(log_file), "--summary", "--output", str(output_file), "--append"])
+
+    content = output_file.read_text(encoding="utf-8")
+    assert content.count("2026-03-01") == 2
 
 
 
