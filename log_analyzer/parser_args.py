@@ -128,6 +128,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--output-dir",
+        help="Write each date summary to a separate file in a directory"
+    )
+
+    parser.add_argument(
         "--no-total",
         action="store_true",
         help="Do not show total row in output",

@@ -1043,7 +1043,27 @@ def test_output_append(tmp_path):
     content = output_file.read_text(encoding="utf-8")
     assert content.count("2026-03-01") == 2
 
+def test_output_dir(tmp_path):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-02 ERROR B\n",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "out"
+
+    result = main([
+        "-f", str(log_file),
+        "--summary",
+        "--output-dir", str(out_dir),
+    ])
+
+    assert result == 0
+    assert (out_dir / "2026-03-01.txt").exists()
+    assert (out_dir / "2026-03-02.txt").exists()
 
 
 

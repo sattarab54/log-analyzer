@@ -175,13 +175,14 @@ def main(argv=None) -> int:
                 if len(parts) > 1:
                     filtered_lines.append(parts[1])
                 else:
-                    filtered_lines.append("")
-                                                                            
+                    filtered_lines.append("")                                                                            
         lines = filtered_lines
                         
     counts = analyze_logs(lines)   
     full_total = sum(counts.values())
-    
+    show_header = not args.no_header
+    decimals = args.percent_decimals
+    show_percent = not args.no_percent
     output_path = args.output or args.output_json_file
 
     if args.output_json_file:
@@ -218,10 +219,12 @@ def main(argv=None) -> int:
     if output_path and inferred_format == "json" and not args.date_summary and not(args.summary_json or args.full_json):
         args.full_json = True
            
-    if args.indent is not None and not (args.summary_json or args.full_json):
+    if args.indent is not None and not (
+        args.summary_json or args.full_json or final_format == "json"
+    ):
         print(
             "Error: --indent requires --summary-json or --full-json",
-            file=sys.stderr,
+            file=sys.stderr
         )
         return 2
 
@@ -365,7 +368,7 @@ def main(argv=None) -> int:
         if args.date_summary:
             summary = build_date_summary(lines)
             summary_items = list(summary.items())
-                        
+                                                                
             if args.min_total is not None and args.min_total < 0:
                 print("Error: --min-total must be >= 0", file=sys.stderr)
                 return 2
@@ -384,7 +387,7 @@ def main(argv=None) -> int:
                 summary_items.sort(
                     key=lambda item: sum(item[1].values()),
                     reverse=True,
-                 )
+                )
 
             if args.reverse:
                 summary_items.reverse()
@@ -395,31 +398,55 @@ def main(argv=None) -> int:
 
             if args.limit is not None:
                 summary_items = summary_items[:args.limit]
+                decimals = args.percent_decimals
 
-            decimals = args.percent_decimals
+            # After summary_items is ready
+
+            if args.output and args.output_dir:
+                print("Error: cannot use --output with --output-dir", file=sys.stderr)
+                return 2
+        
+            if args.output_dir:            
+                os.makedirs(args.output_dir, exist_ok=True)
+
+                for date_key, counts_by_level in summary_items:
+                    file_path = os.path.join(args.output_dir, f"{date_key}.txt")
+
+                    if os.path.exists(file_path) and not (args.force or args.append):
+                        print(f"Error: file exists: {file_path}", file=sys.stderr)
+                        return 2
+
+                    mode = "a" if args.append else "w"
+
+                    with open(file_path, mode, encoding="utf-8") as fh:                
+                        total = sum(counts_by_level.values())
+                    if args.append:
+                        fh.write("\n")
+                        print(
+                            f"{date_key} "
+                            f"ERROR: {counts_by_level['ERROR']} "
+                            f"WARNING: {counts_by_level['WARNING']} "
+                            f"INFO: {counts_by_level['INFO']} "
+                            f"DEBUG: {counts_by_level['DEBUG']} "
+                            f"TOTAL: {total}",
+                            file=fh,
+                        )
+
+                return 0            
             
             if final_format == "json":
-                if args.date_summary or args.summary:
-                    result = {}
-                    for date_key, counts_by_level in summary_items:
-                        total = sum(counts_by_level.values())
-                        result[date_key] = {
-                            **counts_by_level,
-                            "TOTAL": total,
-                        }
-                else:
-                    result = {
-                        "levels": counts,
-                        "total": full_total,
+                result = {}
+                for date_key, counts_by_level in summary_items:
+                    total = sum(counts_by_level.values())
+                    result[date_key] = {
+                        **counts_by_level,
+                        "TOTAL": total,
                     }
-
-                if args.indent is not None:
-                    json.dump(result, target, indent=args.indent)
-                else:
-                    json.dump(result, target)
+                
+                json.dump(result, target, indent=args.indent)                
                 print(file=target)
                 return 0
-                        
+
             if final_format == "csv":                
                 print("date,ERROR,WARNING,INFO,DEBUG,TOTAL", file=target)
                 for date_key, counts_by_level in summary_items:
@@ -434,19 +461,23 @@ def main(argv=None) -> int:
                         file=target,
                     )
                 return 0
-            
-            #  text output            
+                                            
+            #  text output
+
+            LEVELS = ["ERROR", "WARNING", "INFO", "DEBUG"]
+
             for date_key, counts_by_level in summary_items:
                 total = sum(counts_by_level.values())
+
                 if total > 0:
                     pct = {
                         level: (counts_by_level[level] / total) * 100
-                        for level in ["ERROR", "WARNING", "INFO", "DEBUG"]
+                        for level in LEVELS
                     }
                 else:
-                    pct = {level: 0.0 for level in ["ERROR", "WARNING", "INFO", "DEBUG"]}
+                    pct = {level: 0.0 for level in LEVELS}
 
-                if not args.no_percent:
+                if show_percent:
                     print(
                         f"{date_key} "
                         f"ERROR: {counts_by_level['ERROR']} ({pct['ERROR']:.{decimals}f}%) "
@@ -467,12 +498,9 @@ def main(argv=None) -> int:
                         file=target,
                     )
             return 0
-                                                      
+                                                                                      
         # --- Output format ---        
-        show_header = not args.no_header
-        decimals = args.percent_decimals
-        show_percent = not args.no_percent
-
+        
         if args.summary_only:
             print(f"TOTAL: {full_total}", file=target)
             return 0
