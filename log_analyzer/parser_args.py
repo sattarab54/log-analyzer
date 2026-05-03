@@ -7,7 +7,10 @@ from .analyzer import LEVEL_ORDER
 LEVEL_CHOICES = LEVEL_ORDER
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Log Analyzer CLI")
+    parser = argparse.ArgumentParser(
+        description="Log Analyzer CLI",
+        allow_abbrev=False
+    )
 
     parser.add_argument("-f", "--file", required=False, help="Log file path")
 

@@ -381,17 +381,17 @@ def main(argv=None) -> int:
                 ]
                                        
             if args.sort == "date":
-                summary_items.sort(key=lambda item: item[0])
+                summary_items.sort(
+                    key=lambda item: item[0],
+                    reverse=args.reverse
+                )
 
             elif args.sort == "total":
                 summary_items.sort(
                     key=lambda item: sum(item[1].values()),
-                    reverse=True,
+                    reverse=args.reverse
                 )
-
-            if args.reverse:
-                summary_items.reverse()
-
+            
             if args.limit is not None and args.limit <= 0:
                 print("Error: --limit must be > 0", file=sys.stderr)
                 return 2
