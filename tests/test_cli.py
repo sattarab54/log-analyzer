@@ -1065,18 +1065,135 @@ def test_output_dir(tmp_path):
     assert (out_dir / "2026-03-01.txt").exists()
     assert (out_dir / "2026-03-02.txt").exists()
 
+def test_date_summary_sort_total(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-01 WARNING B\n"
+        "2026-03-02 ERROR C\n",
+        encoding="utf-8",
+    )
 
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--sort", "total",        
+    ])
 
+    captured = capsys.readouterr()
 
+    assert result == 0
 
+    lines = captured.out.strip().splitlines()
+    assert "2026-03-01" in lines[0]
+    assert "TOTAL: 2" in lines[0]
 
+def test_date_summary_sort_total_reverse(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated_many.log"
+    log_file.write_text(
+        "2026-03-01 INFO Start\n"
+        "2026-03-01 ERROR Fail\n"
+        "2026-03-15 WARNING Late\n"
+        "2026-04-01 INFO A\n"
+        "2026-04-01 INFO B\n"
+        "2026-04-01 DEBUG C\n",
+        encoding="utf-8",
+    )
 
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--sort", "total",
+        "--reverse",
+    ])
 
+    captured = capsys.readouterr()
 
+    assert result == 0
 
+    lines = [line for line in captured.out.strip().splitlines() if line.strip()]
 
+    assert lines[0].startswith("2026-03-15")
+    assert "TOTAL: 1" in lines[0]
+
+    assert lines[1].startswith("2026-03-01")
+    assert "TOTAL: 2" in lines[1]
+
+    assert lines[2].startswith("2026-04-01")
+    assert "TOTAL: 3" in lines[2]
+
+def test_date_summary_sort_total_same_counts(tmp_path, capsys):
+    from log_analyzer.cli import main
+
+    log_file = tmp_path / "same.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-02 INFO B\n"
+        "2026-03-03 INFO C\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--sort", "total",
+    ])
+
+    captured = capsys.readouterr()
+    assert result == 0
+
+    lines = [l for l in captured.out.splitlines() if l.strip()]
+
+    # all totals = 1 → should keep date order
+    assert lines[0].startswith("2026-03-01")
+    assert lines[1].startswith("2026-03-02")
+    assert lines[2].startswith("2026-03-03")
+
+def test_cli_date_summary_limit_invalid(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--limit", "0",
+    ])
+
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--limit must be > 0" in captured.err
+
+def test_cli_date_summary_limit_negative(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--limit", "-5",
+    ])
+
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--limit must be > 0" in captured.err
+
+def test_cli_date_summary_min_total_negative(capsys):
+    from log_analyzer.cli import main
+
+    result = main([
+        "-f", "dated.log",
+        "--date-summary",
+        "--min-total", "-1",
+    ])
+
+    captured = capsys.readouterr()
+
+    assert result == 2
+    assert "--min-total must be >= 0" in captured.err
 
 
 
