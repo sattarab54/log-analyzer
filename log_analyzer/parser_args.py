@@ -43,7 +43,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--levels",
-        help="Comma-separated log levels, for example ERROR,INFO",
+        help="Comma-separated log levels to include, for example: ERROR,INFO",
     )
     
     parser.add_argument(
@@ -79,14 +79,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--min-total",
         type=int,
-        help="Minimum TOTAL count to include in date summary",
+        help="For date summary, include only dates with TOTAL >= N.",
     )
 
     parser.add_argument(
         "--sort",
         choices=["level", "count", "percent", "alpha", "date", "total"],
         default="level",
-        help="Sort output by level order, count, percent, or alphabetically",
+        help="Sort output. For date summary: date or total. For normal summary: level, count, percent, alpha.",
     )
         
     parser.add_argument(
@@ -110,7 +110,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--limit",
         type=int,        
-        help="Limit number of date summary rows",          
+        help="Limit number of date-summary rows shown.",          
     )
 
     parser.add_argument(
