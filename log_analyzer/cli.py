@@ -300,7 +300,7 @@ def main(argv=None) -> int:
     levels = []
 
     if args.level:
-        levels.extend(args.level)
+        levels.extend([level.upper() for level in args.level])
 
     if args.levels:
         extra_levels = [item.strip().upper() for item in args.levels.split(",") if item.strip()]
@@ -308,7 +308,7 @@ def main(argv=None) -> int:
 
         for level in extra_levels:
             if level not in valid_levels:
-                print(f"Error: invalid level in --levels: {level}", file=sys.stderr)
+                print(f"Error: invalid level '{level}'. Valid values: ERROR, WARNING, INFO, DEBUG", file=sys.stderr)                
                 return 2
 
         levels.extend(extra_levels)

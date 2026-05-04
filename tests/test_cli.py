@@ -1218,9 +1218,29 @@ def test_date_summary_with_level_filter(tmp_path, capsys):
     assert "ERROR: 1" in captured.out
     assert "INFO: 0" in captured.out
 
+def test_levels_case_insensitive(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "INFO A\n"
+        "ERROR B\n",
+        encoding="utf-8",
+    )
 
+    result = main([
+        "-f", str(log_file),
+        "--levels", "error"
+    ])
 
+    captured = capsys.readouterr()
+    lines = [line for line in captured.out.splitlines() if line.strip()]
+
+    assert result == 0
+    assert any(line.startswith("ERROR") and "1" in line for line in lines)
+    assert not any(line.startswith("INFO") for line in lines)
+
+    
 
 
 
