@@ -12,7 +12,7 @@ from .parser_args import build_parser
 from datetime import datetime, timedelta
 from collections import OrderedDict
 
-def build_date_summary(lines):
+def build_date_summary(lines, levels=None):
     summary = OrderedDict()
 
     for line in lines:
@@ -33,6 +33,9 @@ def build_date_summary(lines):
         level = parse_line(rest)
                 
         if level is None:
+            continue
+
+        if levels and level not in levels:
             continue
 
         date_key = line_date.isoformat()        
@@ -366,9 +369,9 @@ def main(argv=None) -> int:
             target = sys.stdout
                                         
         if args.date_summary:
-            summary = build_date_summary(lines)
+            summary = build_date_summary(lines, levels=levels)
             summary_items = list(summary.items())
-                                                                
+                                                                                        
             if args.min_total is not None and args.min_total < 0:
                 print("Error: --min-total must be >= 0", file=sys.stderr)
                 return 2
@@ -383,14 +386,16 @@ def main(argv=None) -> int:
             if args.sort == "date":
                 summary_items.sort(
                     key=lambda item: item[0],
-                    reverse=args.reverse
+                    
                 )
 
             elif args.sort == "total":
                 summary_items.sort(
-                    key=lambda item: sum(item[1].values()),
-                    reverse=args.reverse
+                    key=lambda item: (-sum(item[1].values()), item[0])                    
                 )
+
+            if args.reverse:
+                summary_items.reverse()
             
             if args.limit is not None and args.limit <= 0:
                 print("Error: --limit must be > 0", file=sys.stderr)

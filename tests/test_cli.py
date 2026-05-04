@@ -1195,7 +1195,28 @@ def test_cli_date_summary_min_total_negative(capsys):
     assert result == 2
     assert "--min-total must be >= 0" in captured.err
 
+def test_date_summary_with_level_filter(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "dated.log"
+    log_file.write_text(
+        "2026-03-01 INFO A\n"
+        "2026-03-01 ERROR B\n"
+        "2026-03-01 WARNING C\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--date-summary",
+        "--levels", "ERROR",
+    ])
+
+    captured = capsys.readouterr()
+
+    assert result == 0
+    assert "ERROR: 1" in captured.out
+    assert "INFO: 0" in captured.out
 
 
 
