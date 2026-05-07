@@ -183,7 +183,11 @@ def main(argv=None) -> int:
         
     if args.contains:
         needle = args.contains.lower()
-        lines = [line for line in lines if needle in line.lower()]                    
+        lines = [line for line in lines if needle in line.lower()]
+
+    if args.exclude:
+        needle = args.exclude.lower()
+        lines = [line for line in lines if needle not in line.lower()]
 
     counts = analyze_logs(lines)   
     full_total = sum(counts.values())
