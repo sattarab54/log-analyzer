@@ -182,13 +182,21 @@ def main(argv=None) -> int:
         lines = filtered_lines
         
     if args.contains:
-        needle = args.contains.lower()
-        lines = [line for line in lines if needle in line.lower()]
+        needles = [item.strip().lower() for item in args.contains.split(",") if item.strip()]
 
+        lines = [
+            line for line in lines
+            if any(needle in line.lower() for needle in needles)
+        ]
+        
     if args.exclude:
-        needle = args.exclude.lower()
-        lines = [line for line in lines if needle not in line.lower()]
+        excluded = [item.strip().lower() for item in args.exclude.split(",") if item.strip()]
 
+        lines = [
+            line for line in lines
+            if not any(word in line.lower() for word in excluded)
+        ]
+        
     counts = analyze_logs(lines)   
     full_total = sum(counts.values())
     show_header = not args.no_header
