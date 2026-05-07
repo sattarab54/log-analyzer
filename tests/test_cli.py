@@ -1289,7 +1289,29 @@ def test_exclude_filter(tmp_path, capsys):
     assert any(line.startswith("ERROR") and "0" in line for line in lines)
     assert any(line.startswith("TOTAL") and "2" in line for line in lines)
 
+def test_contains_and_exclude_together(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "ERROR Login failed\n"
+        "ERROR Timeout occurred\n"
+        "INFO Startup complete\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--contains", "error",
+        "--exclude", "timeout",
+    ])
+
+    captured = capsys.readouterr()
+    lines = [line for line in captured.out.splitlines() if line.strip()]
+
+    assert result == 0
+    assert any(line.startswith("ERROR") and "1" in line for line in lines)
+    assert any(line.startswith("TOTAL") and "1" in line for line in lines)
 
 
 
