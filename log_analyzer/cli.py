@@ -180,7 +180,11 @@ def main(argv=None) -> int:
                 else:
                     filtered_lines.append("")                                                                            
         lines = filtered_lines
-                        
+        
+    if args.contains:
+        needle = args.contains.lower()
+        lines = [line for line in lines if needle in line.lower()]                    
+
     counts = analyze_logs(lines)   
     full_total = sum(counts.values())
     show_header = not args.no_header

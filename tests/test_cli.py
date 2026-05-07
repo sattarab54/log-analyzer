@@ -327,7 +327,7 @@ def test_cli_levels_invalid_value_returns_2(tmp_path, capsys):
 
     captured = capsys.readouterr()
     assert rc == 2
-    assert "invalid level in --levels: BOGUS" in captured.err
+    assert "invalid level 'BOGUS'" in captured.err
 
 def test_cli_percent_decimals_table(tmp_path, capsys):
     log_file = write_sample(tmp_path)
@@ -1240,8 +1240,30 @@ def test_levels_case_insensitive(tmp_path, capsys):
     assert any(line.startswith("ERROR") and "1" in line for line in lines)
     assert not any(line.startswith("INFO") for line in lines)
 
-    
+def test_contains_filter(tmp_path, capsys):
+    from log_analyzer.cli import main
 
+    log_file = tmp_path / "test.log"
+    log_file.write_text(
+        "INFO Startup complete\n"
+        "ERROR Login failed\n"
+        "WARNING Slow response\n",
+        encoding="utf-8",
+    )
+
+    result = main([
+        "-f", str(log_file),
+        "--contains", "failed",
+    ])
+
+    captured = capsys.readouterr()
+
+    lines = [line for line in captured.out.splitlines() if line.strip()]
+
+    assert result == 0
+    assert any(line.startswith("ERROR") and "1" in line for line in lines)
+    assert any(line.startswith("TOTAL") and "1" in line for line in lines)
+    
 
 
 

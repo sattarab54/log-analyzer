@@ -114,6 +114,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--contains",
+        help="Only include log lines containing this text",
+    )
+
+    parser.add_argument(
         "--output",
         help="Write output to a file and infer format from extension when possible",
     )
